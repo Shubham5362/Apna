@@ -64,6 +64,7 @@ jobs:
           REDIS_DB: 0
         run: |
           cd backend
+          PYTHONPATH=. alembic upgrade head
           PYTHONPATH=. pytest
 
   frontend-test:
