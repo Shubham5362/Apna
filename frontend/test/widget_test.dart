@@ -20,13 +20,13 @@ class MockApiClient extends ApiClient {
 }
 
 void main() {
-  testWidgets('Apna Mandla Health Monitor UI test', (WidgetTester tester) async {
+  testWidgets('Apna Mandla Health Monitor UI test', (
+    WidgetTester tester,
+  ) async {
     // Build our app under ProviderScope with mocked provider overrides.
     await tester.pumpWidget(
       ProviderScope(
-        overrides: [
-          apiClientProvider.overrideWithValue(MockApiClient()),
-        ],
+        overrides: [apiClientProvider.overrideWithValue(MockApiClient())],
         child: const MyApp(),
       ),
     );

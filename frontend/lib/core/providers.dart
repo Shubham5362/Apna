@@ -10,7 +10,9 @@ final apiClientProvider = Provider<ApiClient>((ref) {
   return ApiClient(baseUrl: backendUrl);
 });
 
-final healthCheckProvider = FutureProvider.autoDispose<Map<String, dynamic>>((ref) async {
+final healthCheckProvider = FutureProvider.autoDispose<Map<String, dynamic>>((
+  ref,
+) async {
   final apiClient = ref.watch(apiClientProvider);
   return apiClient.checkHealth();
 });

@@ -39,14 +39,15 @@ class HealthDashboardView extends ConsumerWidget {
                       const SizedBox(height: 16),
                       Text(
                         'System Status Check',
-                        style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                              fontWeight: FontWeight.bold,
-                            ),
+                        style: Theme.of(context).textTheme.headlineSmall
+                            ?.copyWith(fontWeight: FontWeight.bold),
                       ),
                       const SizedBox(height: 24),
                       healthState.when(
                         data: (data) {
-                          final isHealthy = data['status'] == 'healthy' || data['status'] == 'ok';
+                          final isHealthy =
+                              data['status'] == 'healthy' ||
+                              data['status'] == 'ok';
                           final dbStatus = data['database'] ?? 'unknown';
                           final redisStatus = data['redis'] ?? 'unknown';
                           final version = data['version'] ?? 'unknown';
@@ -104,14 +105,12 @@ class _StatusIndicator extends StatelessWidget {
   final String label;
   final String status;
 
-  const _StatusIndicator({
-    required this.label,
-    required this.status,
-  });
+  const _StatusIndicator({required this.label, required this.status});
 
   @override
   Widget build(BuildContext context) {
-    final bool isOk = status.toLowerCase() == 'healthy' ||
+    final bool isOk =
+        status.toLowerCase() == 'healthy' ||
         status.toLowerCase() == 'connected' ||
         status.toLowerCase() == 'ok';
 
