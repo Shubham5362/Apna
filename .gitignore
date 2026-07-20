@@ -1,0 +1,70 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.coverage
+htmlcov/
+.env
+.venv
+env/
+venv/
+ENV/
+
+# Alembic
+alembic.log
+
+# Databases & Redis
+*.db
+*.sqlite
+dump.rdb
+
+# Flutter & Dart
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+build/
+frontend/ios/Flutter/
+frontend/android/app/
+frontend/android/local.properties
+frontend/android/key.properties
+frontend/android/app/google-services.json
+frontend/ios/Flutter/Generated.xcconfig
+frontend/ios/Flutter/flutter_export_environment.sh
+frontend/ios/Flutter/App.framework
+frontend/ios/Flutter/Flutter.framework
+frontend/ios/Flutter/Flutter.podspec
+frontend/macos/Flutter/ephemeral/
+.pub-cache/
+.pub/
+*.lib
+*.dll
+*.dylib
+*.so
+*.exe
+*.log
+*.mode1v3
+*.mode2v3
+*.normal
+*.perspectivev3
+*.pbxuser
+*.xcworkspace
+xcuserdata/
+*sync/
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Platform specific folders under frontend (if you only want lib, web/index, etc.)
+# If they contain boilerplate, let's keep them tracked but let's exclude standard ephemeral folders:
+frontend/.dart_tool/
+frontend/build/
+frontend/.packages
+frontend/.flutter-plugins
+frontend/.flutter-plugins-dependencies
+frontend/pubspec.lock

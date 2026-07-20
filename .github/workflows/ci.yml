@@ -1,0 +1,106 @@
+name: Apna Mandla CI
+
+on:
+  push:
+    branches: [ main, master, devel, develop ]
+  pull_request:
+    branches: [ main, master, devel, develop ]
+
+jobs:
+  backend-test:
+    runs-on: ubuntu-latest
+    services:
+      db:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: apnamandla
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r backend/requirements.txt
+
+      - name: Run syntax compile check
+        run: |
+          python -m compileall backend/app
+
+      - name: Run Backend Tests
+        env:
+          POSTGRES_SERVER: localhost
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: apnamandla
+          POSTGRES_PORT: 5432
+          REDIS_HOST: localhost
+          REDIS_PORT: 6379
+          REDIS_DB: 0
+        run: |
+          cd backend
+          pytest
+
+  frontend-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: "zulu"
+          java-version: "17"
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: "3.41.2"
+          channel: "stable"
+          cache: true
+
+      - name: Install dependencies
+        run: |
+          cd frontend
+          flutter pub get
+
+      - name: Verify Flutter formatting
+        run: |
+          cd frontend
+          flutter format --set-exit-if-changed lib test
+
+      - name: Analyze Flutter codebase
+        run: |
+          cd frontend
+          flutter analyze
+
+      - name: Run Frontend Tests
+        run: |
+          cd frontend
+          flutter test
