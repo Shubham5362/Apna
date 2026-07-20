@@ -14,6 +14,8 @@ from app.core.config import settings
 from app.core.database import Base
 # Make sure all models are imported so Alembic can find their metadata
 from app.models.item import Item
+from app.models.user import User
+from app.models.otp import OTPVerification
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
