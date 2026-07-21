@@ -103,7 +103,7 @@ class ProductListView extends ConsumerWidget {
                 // Category Filter
                 Expanded(
                   child: DropdownButtonFormField<String?>(
-                    value: selectedCategory,
+                    initialValue: selectedCategory,
                     decoration: const InputDecoration(
                       labelText: 'Category',
                       contentPadding: EdgeInsets.symmetric(
@@ -130,7 +130,7 @@ class ProductListView extends ConsumerWidget {
                   child: shopsAsync.when(
                     data: (shops) {
                       return DropdownButtonFormField<int?>(
-                        value: selectedShopId,
+                        initialValue: selectedShopId,
                         decoration: const InputDecoration(
                           labelText: 'Shop',
                           contentPadding: EdgeInsets.symmetric(

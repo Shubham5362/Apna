@@ -170,7 +170,7 @@ class _CreateProductViewState extends ConsumerState<CreateProductView> {
                   }
 
                   return DropdownButtonFormField<int?>(
-                    value: _selectedShopId,
+                    initialValue: _selectedShopId,
                     decoration: InputDecoration(
                       labelText: 'Select Shop',
                       prefixIcon: const Icon(Icons.store),
