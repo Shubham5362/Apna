@@ -1,5 +1,7 @@
+import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 
 from app.core.config import settings
 from app.core.logging import setup_logging
@@ -34,6 +36,9 @@ if settings.BACKEND_CORS_ORIGINS:
 register_exception_handlers(app)
 
 # 5. Register APIRouters
+os.makedirs("uploads/profile_photos", exist_ok=True)
+app.mount("/static", StaticFiles(directory="uploads"), name="static")
+
 app.include_router(api_router, prefix=settings.API_V1_STR)
 
 
