@@ -19,6 +19,8 @@ from app.models.otp import OTPVerification
 from app.models.user_profile import UserProfile
 from app.models.shop import Shop
 from app.models.product import Product
+from app.models.cart import CartItem
+from app.models.order import Order, OrderItem
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

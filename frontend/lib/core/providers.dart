@@ -295,3 +295,165 @@ final productOpsProvider =
       final client = ref.watch(apiClientProvider);
       return ProductOpsNotifier(client, ref);
     });
+
+// --- Cart state and providers ---
+class CartState {
+  final Map<String, dynamic>? cart;
+  final bool isLoading;
+  final String? error;
+
+  CartState({this.cart, this.isLoading = false, this.error});
+
+  CartState copyWith({
+    Map<String, dynamic>? cart,
+    bool? isLoading,
+    String? error,
+  }) {
+    return CartState(
+      cart: cart ?? this.cart,
+      isLoading: isLoading ?? this.isLoading,
+      error: error ?? this.error,
+    );
+  }
+}
+
+class CartNotifier extends StateNotifier<CartState> {
+  final ApiClient _apiClient;
+
+  CartNotifier(this._apiClient) : super(CartState()) {
+    fetchCart();
+  }
+
+  Future<void> fetchCart() async {
+    state = state.copyWith(isLoading: true, error: null);
+    try {
+      final cart = await _apiClient.getCart();
+      state = CartState(cart: cart, isLoading: false);
+    } catch (e) {
+      state = CartState(isLoading: false, error: e.toString());
+    }
+  }
+
+  Future<bool> addToCart(int productId, int quantity) async {
+    state = state.copyWith(isLoading: true, error: null);
+    try {
+      final cart = await _apiClient.addToCart(productId, quantity);
+      state = CartState(cart: cart, isLoading: false);
+      return true;
+    } catch (e) {
+      state = state.copyWith(isLoading: false, error: e.toString());
+      return false;
+    }
+  }
+
+  Future<bool> updateCartItem(int itemId, int quantity) async {
+    state = state.copyWith(isLoading: true, error: null);
+    try {
+      final cart = await _apiClient.updateCartItem(itemId, quantity);
+      state = CartState(cart: cart, isLoading: false);
+      return true;
+    } catch (e) {
+      state = state.copyWith(isLoading: false, error: e.toString());
+      return false;
+    }
+  }
+
+  Future<bool> removeFromCart(int itemId) async {
+    state = state.copyWith(isLoading: true, error: null);
+    try {
+      final cart = await _apiClient.removeFromCart(itemId);
+      state = CartState(cart: cart, isLoading: false);
+      return true;
+    } catch (e) {
+      state = state.copyWith(isLoading: false, error: e.toString());
+      return false;
+    }
+  }
+
+  Future<bool> clearCart() async {
+    state = state.copyWith(isLoading: true, error: null);
+    try {
+      final cart = await _apiClient.clearCart();
+      state = CartState(cart: cart, isLoading: false);
+      return true;
+    } catch (e) {
+      state = state.copyWith(isLoading: false, error: e.toString());
+      return false;
+    }
+  }
+}
+
+final cartProvider = StateNotifierProvider<CartNotifier, CartState>((ref) {
+  final client = ref.watch(apiClientProvider);
+  return CartNotifier(client);
+});
+
+// --- Order state and providers ---
+final ordersListProvider = FutureProvider.autoDispose<List<dynamic>>((
+  ref,
+) async {
+  final client = ref.watch(apiClientProvider);
+  return client.getOrders();
+});
+
+final orderDetailsProvider = FutureProvider.autoDispose
+    .family<Map<String, dynamic>, int>((ref, id) async {
+      final client = ref.watch(apiClientProvider);
+      return client.getOrderById(id);
+    });
+
+class OrderOpsState {
+  final bool isLoading;
+  final String? error;
+
+  OrderOpsState({this.isLoading = false, this.error});
+
+  OrderOpsState copyWith({bool? isLoading, String? error}) {
+    return OrderOpsState(
+      isLoading: isLoading ?? this.isLoading,
+      error: error ?? this.error,
+    );
+  }
+}
+
+class OrderOpsNotifier extends StateNotifier<OrderOpsState> {
+  final ApiClient _apiClient;
+  final Ref _ref;
+
+  OrderOpsNotifier(this._apiClient, this._ref) : super(OrderOpsState());
+
+  Future<Map<String, dynamic>?> placeOrder(String deliveryAddress) async {
+    state = OrderOpsState(isLoading: true);
+    try {
+      final order = await _apiClient.createOrder(deliveryAddress);
+      state = OrderOpsState(isLoading: false);
+      _ref.invalidate(ordersListProvider);
+      _ref.read(cartProvider.notifier).fetchCart(); // Fetch the cleared cart
+      return order;
+    } catch (e) {
+      state = OrderOpsState(isLoading: false, error: e.toString());
+      return null;
+    }
+  }
+
+  Future<bool> updateStatus(int orderId, String status) async {
+    state = OrderOpsState(isLoading: true);
+    try {
+      await _apiClient.updateOrderStatus(orderId, status);
+      state = OrderOpsState(isLoading: false);
+      _ref.invalidate(ordersListProvider);
+      _ref.invalidate(orderDetailsProvider(orderId));
+      return true;
+    } catch (e) {
+      state = OrderOpsState(isLoading: false, error: e.toString());
+      return false;
+    }
+  }
+}
+
+final orderOpsProvider = StateNotifierProvider<OrderOpsNotifier, OrderOpsState>(
+  (ref) {
+    final client = ref.watch(apiClientProvider);
+    return OrderOpsNotifier(client, ref);
+  },
+);

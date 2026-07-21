@@ -16,7 +16,7 @@ class HealthDashboardView extends ConsumerWidget {
         centerTitle: true,
       ),
       body: Center(
-        child: Padding(
+        child: SingleChildScrollView(
           padding: const EdgeInsets.all(24.0),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -137,6 +137,32 @@ class HealthDashboardView extends ConsumerWidget {
                     },
                     icon: const Icon(Icons.shopping_bag),
                     label: const Text('Go to Products'),
+                  ),
+                  ElevatedButton.icon(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.teal,
+                      foregroundColor: Colors.white,
+                    ),
+                    onPressed: () {
+                      ref.read(authTokenProvider.notifier).state =
+                          'mock_jwt_token';
+                      context.go('/cart');
+                    },
+                    icon: const Icon(Icons.shopping_cart),
+                    label: const Text('Go to Cart'),
+                  ),
+                  ElevatedButton.icon(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.purple,
+                      foregroundColor: Colors.white,
+                    ),
+                    onPressed: () {
+                      ref.read(authTokenProvider.notifier).state =
+                          'mock_jwt_token';
+                      context.go('/orders');
+                    },
+                    icon: const Icon(Icons.receipt_long),
+                    label: const Text('Go to Orders'),
                   ),
                 ],
               ),
