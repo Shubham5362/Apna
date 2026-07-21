@@ -1,5 +1,6 @@
 import 'package:go_router/go_router.dart';
 import '../views/health_dashboard_view.dart';
+import '../views/user_profile_view.dart';
 
 final GoRouter routerConfig = GoRouter(
   initialLocation: '/',
@@ -7,6 +8,10 @@ final GoRouter routerConfig = GoRouter(
     GoRoute(
       path: '/',
       builder: (context, state) => const HealthDashboardView(),
+    ),
+    GoRoute(
+      path: '/profile',
+      builder: (context, state) => const UserProfileView(),
     ),
   ],
 );
