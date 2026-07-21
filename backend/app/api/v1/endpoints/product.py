@@ -30,7 +30,6 @@ def create_product(
     """
     Create a new product. Only the shop owner can create products.
     """
-    # 1. Check if shop exists
     shop = db.query(Shop).filter(Shop.id == product_in.shop_id).first()
     if not shop:
         raise HTTPException(
@@ -38,7 +37,6 @@ def create_product(
             detail="Shop not found.",
         )
 
-    # 2. Check if current user is owner of the shop
     if shop.owner_id != current_user.id:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
@@ -49,7 +47,9 @@ def create_product(
         name=product_in.name,
         description=product_in.description,
         category=product_in.category,
+        brand=product_in.brand,
         price=product_in.price,
+        mrp=product_in.mrp,
         stock=product_in.stock,
         shop_id=product_in.shop_id,
         is_active=True,
@@ -63,7 +63,9 @@ def create_product(
         name=product.name,
         description=product.description,
         category=product.category,
+        brand=product.brand,
         price=product.price,
+        mrp=product.mrp,
         stock=product.stock,
         image_url=get_product_image_url(product.image_path),
         is_active=product.is_active,
@@ -81,7 +83,7 @@ def read_products(
     search: Optional[str] = None,
     category: Optional[str] = None,
     shop_id: Optional[int] = None,
-    sort_by: str = Query("latest", description="Sorting option: latest, price_low_high, price_high_low")
+    sort_by: str = Query("newest", description="Sorting option: newest, oldest, price low-high, price high-low")
 ) -> Any:
     """
     Retrieve all products with optional filters, search, and sorting.
@@ -97,11 +99,13 @@ def read_products(
         query = query.filter(Product.shop_id == shop_id)
 
     # Apply sorting
-    if sort_by == "price_low_high":
+    if sort_by == "oldest":
+        query = query.order_by(Product.created_at.asc())
+    elif sort_by == "price low-high":
         query = query.order_by(Product.price.asc())
-    elif sort_by == "price_high_low":
+    elif sort_by == "price high-low":
         query = query.order_by(Product.price.desc())
-    else:  # "latest" or default
+    else:  # "newest" or default
         query = query.order_by(Product.created_at.desc())
 
     products = query.offset(skip).limit(limit).all()
@@ -112,7 +116,9 @@ def read_products(
             name=p.name,
             description=p.description,
             category=p.category,
+            brand=p.brand,
             price=p.price,
+            mrp=p.mrp,
             stock=p.stock,
             image_url=get_product_image_url(p.image_path),
             is_active=p.is_active,
@@ -144,7 +150,9 @@ def read_product_by_id(
         name=product.name,
         description=product.description,
         category=product.category,
+        brand=product.brand,
         price=product.price,
+        mrp=product.mrp,
         stock=product.stock,
         image_url=get_product_image_url(product.image_path),
         is_active=product.is_active,
@@ -171,7 +179,6 @@ def update_product(
             detail="Product not found.",
         )
 
-    # Resolve shop associated with this product
     shop = db.query(Shop).filter(Shop.id == product.shop_id).first()
     if not shop or shop.owner_id != current_user.id:
         raise HTTPException(
@@ -191,7 +198,9 @@ def update_product(
         name=product.name,
         description=product.description,
         category=product.category,
+        brand=product.brand,
         price=product.price,
+        mrp=product.mrp,
         stock=product.stock,
         image_url=get_product_image_url(product.image_path),
         is_active=product.is_active,
@@ -217,7 +226,6 @@ def delete_product(
             detail="Product not found.",
         )
 
-    # Resolve shop associated with this product
     shop = db.query(Shop).filter(Shop.id == product.shop_id).first()
     if not shop or shop.owner_id != current_user.id:
         raise HTTPException(
@@ -225,7 +233,6 @@ def delete_product(
             detail="You are not authorized to delete this product.",
         )
 
-    # Delete local image file if it exists
     if product.image_path and os.path.exists(product.image_path):
         try:
             os.remove(product.image_path)
@@ -240,7 +247,9 @@ def delete_product(
         name=product.name,
         description=product.description,
         category=product.category,
+        brand=product.brand,
         price=product.price,
+        mrp=product.mrp,
         stock=product.stock,
         image_url=None,
         is_active=product.is_active,
@@ -267,7 +276,6 @@ async def upload_product_photo(
             detail="Product not found.",
         )
 
-    # Resolve shop associated with this product
     shop = db.query(Shop).filter(Shop.id == product.shop_id).first()
     if not shop or shop.owner_id != current_user.id:
         raise HTTPException(
@@ -275,14 +283,12 @@ async def upload_product_photo(
             detail="You are not authorized to update this product's photo.",
         )
 
-    # 1. Validate MIME type
     if not file.content_type.startswith("image/"):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="File must be an image.",
         )
 
-    # 2. Validate file extension
     ext = os.path.splitext(file.filename)[1].lower()
     if ext not in [".jpg", ".jpeg", ".png", ".webp", ".gif"]:
         raise HTTPException(
@@ -290,7 +296,6 @@ async def upload_product_photo(
             detail="Invalid image format. Allowed: JPG, JPEG, PNG, WEBP, GIF.",
         )
 
-    # 3. Save file locally
     os.makedirs(UPLOAD_DIR, exist_ok=True)
     unique_filename = f"{uuid.uuid4().hex}{ext}"
     file_path = os.path.join(UPLOAD_DIR, unique_filename)
@@ -305,7 +310,6 @@ async def upload_product_photo(
             detail=f"Could not save product photo: {str(e)}",
         )
 
-    # Delete old file if exists
     if product.image_path and os.path.exists(product.image_path):
         try:
             os.remove(product.image_path)
@@ -321,7 +325,9 @@ async def upload_product_photo(
         name=product.name,
         description=product.description,
         category=product.category,
+        brand=product.brand,
         price=product.price,
+        mrp=product.mrp,
         stock=product.stock,
         image_url=get_product_image_url(product.image_path),
         is_active=product.is_active,

@@ -190,7 +190,7 @@ final shopOpsProvider = StateNotifierProvider<ShopOpsNotifier, ShopOpsState>((
 final productSearchQueryProvider = StateProvider<String>((ref) => '');
 final productSelectedCategoryProvider = StateProvider<String?>((ref) => null);
 final productSelectedShopIdProvider = StateProvider<int?>((ref) => null);
-final productSortByProvider = StateProvider<String>((ref) => 'latest');
+final productSortByProvider = StateProvider<String>((ref) => 'newest');
 
 final productsListProvider = FutureProvider.autoDispose<List<dynamic>>((
   ref,

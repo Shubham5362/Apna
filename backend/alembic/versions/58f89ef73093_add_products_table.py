@@ -26,7 +26,9 @@ def upgrade() -> None:
         sa.Column('name', sa.String(), nullable=False),
         sa.Column('description', sa.String(), nullable=True),
         sa.Column('category', sa.String(), nullable=True),
+        sa.Column('brand', sa.String(), nullable=True),
         sa.Column('price', sa.Float(), nullable=False),
+        sa.Column('mrp', sa.Float(), nullable=True),
         sa.Column('stock', sa.Integer(), nullable=False, server_default='0'),
         sa.Column('image_path', sa.String(), nullable=True),
         sa.Column('is_active', sa.Boolean(), nullable=True, server_default='true'),
@@ -39,14 +41,18 @@ def upgrade() -> None:
     op.create_index(op.f('ix_products_id'), 'products', ['id'], unique=False)
     op.create_index(op.f('ix_products_name'), 'products', ['name'], unique=False)
     op.create_index(op.f('ix_products_category'), 'products', ['category'], unique=False)
+    op.create_index(op.f('ix_products_brand'), 'products', ['brand'], unique=False)
     op.create_index(op.f('ix_products_price'), 'products', ['price'], unique=False)
+    op.create_index(op.f('ix_products_mrp'), 'products', ['mrp'], unique=False)
     op.create_index(op.f('ix_products_shop_id'), 'products', ['shop_id'], unique=False)
 
 
 def downgrade() -> None:
     """Downgrade schema."""
     op.drop_index(op.f('ix_products_shop_id'), table_name='products')
+    op.drop_index(op.f('ix_products_mrp'), table_name='products')
     op.drop_index(op.f('ix_products_price'), table_name='products')
+    op.drop_index(op.f('ix_products_brand'), table_name='products')
     op.drop_index(op.f('ix_products_category'), table_name='products')
     op.drop_index(op.f('ix_products_name'), table_name='products')
     op.drop_index(op.f('ix_products_id'), table_name='products')

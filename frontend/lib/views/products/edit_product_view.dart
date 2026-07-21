@@ -17,7 +17,9 @@ class _EditProductViewState extends ConsumerState<EditProductView> {
   late TextEditingController _nameController;
   late TextEditingController _descController;
   late TextEditingController _categoryController;
+  late TextEditingController _brandController;
   late TextEditingController _priceController;
+  late TextEditingController _mrpController;
   late TextEditingController _stockController;
   bool _isActive = true;
   bool _initialized = false;
@@ -28,7 +30,9 @@ class _EditProductViewState extends ConsumerState<EditProductView> {
     _nameController = TextEditingController();
     _descController = TextEditingController();
     _categoryController = TextEditingController();
+    _brandController = TextEditingController();
     _priceController = TextEditingController();
+    _mrpController = TextEditingController();
     _stockController = TextEditingController();
   }
 
@@ -37,7 +41,9 @@ class _EditProductViewState extends ConsumerState<EditProductView> {
     _nameController.dispose();
     _descController.dispose();
     _categoryController.dispose();
+    _brandController.dispose();
     _priceController.dispose();
+    _mrpController.dispose();
     _stockController.dispose();
     super.dispose();
   }
@@ -52,7 +58,13 @@ class _EditProductViewState extends ConsumerState<EditProductView> {
         'category': _categoryController.text.trim().isEmpty
             ? null
             : _categoryController.text.trim(),
+        'brand': _brandController.text.trim().isEmpty
+            ? null
+            : _brandController.text.trim(),
         'price': double.parse(_priceController.text.trim()),
+        'mrp': _mrpController.text.trim().isEmpty
+            ? null
+            : double.parse(_mrpController.text.trim()),
         'stock': int.parse(_stockController.text.trim()),
         'is_active': _isActive,
       };
@@ -101,7 +113,9 @@ class _EditProductViewState extends ConsumerState<EditProductView> {
             _nameController.text = product['name'] ?? '';
             _descController.text = product['description'] ?? '';
             _categoryController.text = product['category'] ?? '';
+            _brandController.text = product['brand'] ?? '';
             _priceController.text = (product['price'] ?? 0.0).toString();
+            _mrpController.text = (product['mrp'] ?? '').toString();
             _stockController.text = (product['stock'] ?? 0).toString();
             _isActive = product['is_active'] ?? true;
             _initialized = true;
@@ -136,6 +150,45 @@ class _EditProductViewState extends ConsumerState<EditProductView> {
                     children: [
                       Expanded(
                         child: TextFormField(
+                          controller: _brandController,
+                          decoration: InputDecoration(
+                            labelText: 'Brand (Optional)',
+                            prefixIcon: const Icon(
+                              Icons.branding_watermark_outlined,
+                            ),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: TextFormField(
+                          controller: _categoryController,
+                          decoration: InputDecoration(
+                            labelText: 'Category',
+                            prefixIcon: const Icon(Icons.category_outlined),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                          validator: (value) {
+                            if (value == null || value.trim().isEmpty) {
+                              return 'Category is required';
+                            }
+                            return null;
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+
+                  Row(
+                    children: [
+                      Expanded(
+                        child: TextFormField(
                           controller: _priceController,
                           keyboardType: const TextInputType.numberWithOptions(
                             decimal: true,
@@ -162,22 +215,23 @@ class _EditProductViewState extends ConsumerState<EditProductView> {
                       const SizedBox(width: 16),
                       Expanded(
                         child: TextFormField(
-                          controller: _stockController,
-                          keyboardType: TextInputType.number,
+                          controller: _mrpController,
+                          keyboardType: const TextInputType.numberWithOptions(
+                            decimal: true,
+                          ),
                           decoration: InputDecoration(
-                            labelText: 'Stock Units',
-                            prefixIcon: const Icon(Icons.inventory_2_outlined),
+                            labelText: 'MRP (\$ - Optional)',
+                            prefixIcon: const Icon(Icons.money_off),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(8),
                             ),
                           ),
                           validator: (value) {
-                            if (value == null || value.trim().isEmpty) {
-                              return 'Stock is required';
-                            }
-                            if (int.tryParse(value) == null ||
-                                int.parse(value) < 0) {
-                              return 'Enter valid stock';
+                            if (value != null && value.trim().isNotEmpty) {
+                              if (double.tryParse(value) == null ||
+                                  double.parse(value) <= 0) {
+                                return 'Enter valid MRP';
+                              }
                             }
                             return null;
                           },
@@ -188,17 +242,21 @@ class _EditProductViewState extends ConsumerState<EditProductView> {
                   const SizedBox(height: 16),
 
                   TextFormField(
-                    controller: _categoryController,
+                    controller: _stockController,
+                    keyboardType: TextInputType.number,
                     decoration: InputDecoration(
-                      labelText: 'Category',
-                      prefixIcon: const Icon(Icons.category_outlined),
+                      labelText: 'Stock Units',
+                      prefixIcon: const Icon(Icons.inventory_2_outlined),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
                     ),
                     validator: (value) {
                       if (value == null || value.trim().isEmpty) {
-                        return 'Category is required';
+                        return 'Stock is required';
+                      }
+                      if (int.tryParse(value) == null || int.parse(value) < 0) {
+                        return 'Enter valid stock';
                       }
                       return null;
                     },

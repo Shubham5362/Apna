@@ -76,13 +76,14 @@ class ProductListView extends ConsumerWidget {
                     }
                   },
                   items: const [
-                    DropdownMenuItem(value: 'latest', child: Text('Latest')),
+                    DropdownMenuItem(value: 'newest', child: Text('Newest')),
+                    DropdownMenuItem(value: 'oldest', child: Text('Oldest')),
                     DropdownMenuItem(
-                      value: 'price_low_high',
+                      value: 'price low-high',
                       child: Text('Price: Low-High'),
                     ),
                     DropdownMenuItem(
-                      value: 'price_high_low',
+                      value: 'price high-low',
                       child: Text('Price: High-Low'),
                     ),
                   ],
@@ -205,7 +206,7 @@ class ProductListView extends ConsumerWidget {
                   padding: const EdgeInsets.all(16),
                   gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 2,
-                    childAspectRatio: 0.75,
+                    childAspectRatio: 0.70,
                     crossAxisSpacing: 16,
                     mainAxisSpacing: 16,
                   ),
@@ -215,6 +216,8 @@ class ProductListView extends ConsumerWidget {
                     final id = product['id'] as int;
                     final name = product['name'] as String;
                     final price = product['price'] as double;
+                    final mrp = product['mrp'] as double?;
+                    final brand = product['brand'] as String?;
                     final stock = product['stock'] as int;
                     final cat = product['category'] ?? 'General';
                     final imageUrl = product['image_url'];
@@ -270,18 +273,49 @@ class ProductListView extends ConsumerWidget {
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
                                   ),
+                                  if (brand != null && brand.isNotEmpty) ...[
+                                    const SizedBox(height: 2),
+                                    Text(
+                                      brand,
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        color: Colors.grey.shade600,
+                                        fontStyle: FontStyle.italic,
+                                      ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ],
                                   const SizedBox(height: 4),
                                   Row(
                                     mainAxisAlignment:
                                         MainAxisAlignment.spaceBetween,
                                     children: [
-                                      Text(
-                                        '\$$price',
-                                        style: const TextStyle(
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.green,
-                                        ),
+                                      Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            '\$$price',
+                                            style: const TextStyle(
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.green,
+                                            ),
+                                          ),
+                                          if (mrp != null) ...[
+                                            const SizedBox(height: 1),
+                                            Text(
+                                              '\$$mrp',
+                                              style: const TextStyle(
+                                                fontSize: 11,
+                                                color: Colors.red,
+                                                decoration:
+                                                    TextDecoration.lineThrough,
+                                              ),
+                                            ),
+                                          ],
+                                        ],
                                       ),
                                       Container(
                                         padding: const EdgeInsets.symmetric(

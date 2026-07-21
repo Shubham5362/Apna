@@ -98,7 +98,9 @@ class ProductDetailsView extends ConsumerWidget {
           final name = product['name'] as String;
           final desc = product['description'] ?? 'No description available.';
           final category = product['category'] ?? 'General';
+          final brand = product['brand'] as String?;
           final price = product['price'] as double;
+          final mrp = product['mrp'] as double?;
           final stock = product['stock'] as int;
           final imageUrl = product['image_url'];
           final fullImageUrl = imageUrl != null ? '$baseUrl$imageUrl' : null;
@@ -161,16 +163,45 @@ class ProductDetailsView extends ConsumerWidget {
                                   ?.copyWith(fontWeight: FontWeight.bold),
                             ),
                           ),
-                          Text(
-                            '\$$price',
-                            style: Theme.of(context).textTheme.headlineMedium
-                                ?.copyWith(
-                                  color: Colors.green,
-                                  fontWeight: FontWeight.bold,
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              Text(
+                                '\$$price',
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .headlineMedium
+                                    ?.copyWith(
+                                      color: Colors.green,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                              ),
+                              if (mrp != null) ...[
+                                const SizedBox(height: 2),
+                                Text(
+                                  'MRP: \$$mrp',
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                    color: Colors.red,
+                                    decoration: TextDecoration.lineThrough,
+                                  ),
                                 ),
+                              ],
+                            ],
                           ),
                         ],
                       ),
+                      if (brand != null && brand.isNotEmpty) ...[
+                        const SizedBox(height: 4),
+                        Text(
+                          'Brand: $brand',
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: Colors.grey.shade700,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
                       const SizedBox(height: 8),
                       Row(
                         children: [

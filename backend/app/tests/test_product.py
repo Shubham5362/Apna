@@ -41,7 +41,6 @@ def test_create_product_unauthenticated():
 
 
 def test_create_product_success(db: Session):
-    # Setup: clean products and shops, then create a shop
     db.query(Product).delete()
     db.query(Shop).delete()
     db.commit()
@@ -61,7 +60,9 @@ def test_create_product_success(db: Session):
             "name": "Apple Organic",
             "description": "Sweet red apples",
             "category": "Fruits",
+            "brand": "AppleBrand",
             "price": 3.99,
+            "mrp": 4.99,
             "stock": 100,
             "shop_id": shop.id,
         },
@@ -70,6 +71,8 @@ def test_create_product_success(db: Session):
     data = response.json()
     assert data["name"] == "Apple Organic"
     assert data["price"] == 3.99
+    assert data["mrp"] == 4.99
+    assert data["brand"] == "AppleBrand"
     assert data["category"] == "Fruits"
     assert data["stock"] == 100
 
@@ -78,7 +81,6 @@ def test_create_product_unauthorized(db: Session):
     shop = db.query(Shop).first()
     assert shop is not None
 
-    # Another user tries to add product to this shop
     token = get_auth_token(db, "+911111111111", "Another User")
     response = client.post(
         "/api/v1/products",
@@ -94,7 +96,6 @@ def test_create_product_unauthorized(db: Session):
 
 
 def test_get_products_list_and_search(db: Session):
-    # Add a second product
     shop = db.query(Shop).first()
     assert shop is not None
 
@@ -102,7 +103,9 @@ def test_get_products_list_and_search(db: Session):
         name="Banana Yellow",
         description="Fresh yellow bananas",
         category="Fruits",
+        brand="BananaBrand",
         price=1.49,
+        mrp=1.99,
         stock=200,
         shop_id=shop.id,
     )
@@ -127,10 +130,16 @@ def test_get_products_list_and_search(db: Session):
     assert len(response.json()) >= 2
 
     # 4. Sorting price low-high
-    response = client.get("/api/v1/products?sort_by=price_low_high")
+    response = client.get("/api/v1/products?sort_by=price+low-high")
     assert response.status_code == 200
     data = response.json()
     assert data[0]["price"] == 1.49
+
+    # 5. Sorting oldest
+    response = client.get("/api/v1/products?sort_by=oldest")
+    assert response.status_code == 200
+    data = response.json()
+    assert data[0]["name"] == "Apple Organic"
 
 
 def test_get_product_by_id_success(db: Session):
@@ -157,11 +166,13 @@ def test_update_product_success(db: Session):
     response = client.put(
         f"/api/v1/products/{product.id}",
         headers={"Authorization": f"Bearer {token}"},
-        json={"name": "Apple Premium Organic", "price": 4.5},
+        json={"name": "Apple Premium Organic", "price": 4.5, "mrp": 5.5, "brand": "SuperApple"},
     )
     assert response.status_code == 200
     assert response.json()["name"] == "Apple Premium Organic"
     assert response.json()["price"] == 4.5
+    assert response.json()["mrp"] == 5.5
+    assert response.json()["brand"] == "SuperApple"
 
 
 def test_update_product_unauthorized(db: Session):
