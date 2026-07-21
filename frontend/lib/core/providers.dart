@@ -532,3 +532,120 @@ final paymentOpsProvider =
       final client = ref.watch(apiClientProvider);
       return PaymentOpsNotifier(client, ref);
     });
+
+// --- Rating & Review state and providers ---
+final productReviewsProvider = FutureProvider.autoDispose
+    .family<List<dynamic>, int>((ref, productId) async {
+      final client = ref.watch(apiClientProvider);
+      return client.getReviews(productId: productId);
+    });
+
+final shopReviewsProvider = FutureProvider.autoDispose
+    .family<List<dynamic>, int>((ref, shopId) async {
+      final client = ref.watch(apiClientProvider);
+      return client.getReviews(shopId: shopId);
+    });
+
+final productRatingSummaryProvider = FutureProvider.autoDispose
+    .family<Map<String, dynamic>, int>((ref, productId) async {
+      final client = ref.watch(apiClientProvider);
+      return client.getRatingSummary(productId: productId);
+    });
+
+final shopRatingSummaryProvider = FutureProvider.autoDispose
+    .family<Map<String, dynamic>, int>((ref, shopId) async {
+      final client = ref.watch(apiClientProvider);
+      return client.getRatingSummary(shopId: shopId);
+    });
+
+class ReviewOpsState {
+  final bool isLoading;
+  final String? error;
+
+  ReviewOpsState({this.isLoading = false, this.error});
+}
+
+class ReviewOpsNotifier extends StateNotifier<ReviewOpsState> {
+  final ApiClient _apiClient;
+  final Ref _ref;
+
+  ReviewOpsNotifier(this._apiClient, this._ref) : super(ReviewOpsState());
+
+  Future<Map<String, dynamic>?> createReview({
+    int? productId,
+    int? shopId,
+    required int ratingValue,
+    required String comment,
+  }) async {
+    state = ReviewOpsState(isLoading: true);
+    try {
+      final res = await _apiClient.createReview(
+        productId: productId,
+        shopId: shopId,
+        ratingValue: ratingValue,
+        comment: comment,
+      );
+      state = ReviewOpsState(isLoading: false);
+      _invalidateCache(productId, shopId);
+      return res;
+    } catch (e) {
+      state = ReviewOpsState(isLoading: false, error: e.toString());
+      return null;
+    }
+  }
+
+  Future<Map<String, dynamic>?> updateReview(
+    int reviewId, {
+    int? ratingValue,
+    String? comment,
+    int? productId,
+    int? shopId,
+  }) async {
+    state = ReviewOpsState(isLoading: true);
+    try {
+      final res = await _apiClient.updateReview(
+        reviewId,
+        ratingValue: ratingValue,
+        comment: comment,
+      );
+      state = ReviewOpsState(isLoading: false);
+      _invalidateCache(productId, shopId);
+      return res;
+    } catch (e) {
+      state = ReviewOpsState(isLoading: false, error: e.toString());
+      return null;
+    }
+  }
+
+  Future<bool> deleteReview(int reviewId, {int? productId, int? shopId}) async {
+    state = ReviewOpsState(isLoading: true);
+    try {
+      await _apiClient.deleteReview(reviewId);
+      state = ReviewOpsState(isLoading: false);
+      _invalidateCache(productId, shopId);
+      return true;
+    } catch (e) {
+      state = ReviewOpsState(isLoading: false, error: e.toString());
+      return false;
+    }
+  }
+
+  void _invalidateCache(int? productId, int? shopId) {
+    if (productId != null) {
+      _ref.invalidate(productReviewsProvider(productId));
+      _ref.invalidate(productRatingSummaryProvider(productId));
+      _ref.invalidate(productDetailsProvider(productId));
+    }
+    if (shopId != null) {
+      _ref.invalidate(shopReviewsProvider(shopId));
+      _ref.invalidate(shopRatingSummaryProvider(shopId));
+      _ref.invalidate(shopDetailsProvider(shopId));
+    }
+  }
+}
+
+final reviewOpsProvider =
+    StateNotifierProvider<ReviewOpsNotifier, ReviewOpsState>((ref) {
+      final client = ref.watch(apiClientProvider);
+      return ReviewOpsNotifier(client, ref);
+    });

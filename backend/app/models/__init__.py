@@ -3,3 +3,4 @@ from app.models.item import Item
 from app.models.user import User
 from app.models.otp import OTPVerification
 from app.models.payment import Payment
+from app.models.rating_review import Rating, Review

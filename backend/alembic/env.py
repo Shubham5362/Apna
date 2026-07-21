@@ -22,6 +22,7 @@ from app.models.product import Product
 from app.models.cart import CartItem
 from app.models.order import Order, OrderItem
 from app.models.payment import Payment
+from app.models.rating_review import Rating, Review
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

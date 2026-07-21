@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/providers.dart';
+import '../widgets/rating_widgets.dart';
 
 class ProductDetailsView extends ConsumerWidget {
   final int productId;
@@ -276,6 +277,148 @@ class ProductDetailsView extends ConsumerWidget {
                           ],
                         ),
                       ],
+                      const Divider(height: 40),
+                      // Ratings & Reviews Header
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'Ratings & Reviews',
+                            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                          ),
+                          ElevatedButton.icon(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.blue,
+                              foregroundColor: Colors.white,
+                            ),
+                            onPressed: () => context.go('/review/write?productId=$productId'),
+                            icon: const Icon(Icons.rate_review),
+                            label: const Text('Write Review'),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+
+                      // Rating Summary Card
+                      ref.watch(productRatingSummaryProvider(productId)).when(
+                            data: (summary) {
+                              final avg = summary['average_rating'] as double? ?? 0.0;
+                              final total = summary['total_ratings'] as int? ?? 0;
+                              final starCountsRaw = summary['star_counts'] as Map<String, dynamic>? ?? {};
+                              final Map<int, int> starCounts = {};
+                              starCountsRaw.forEach((k, v) {
+                                starCounts[int.parse(k)] = v as int;
+                              });
+
+                              return RatingSummaryWidget(
+                                averageRating: avg,
+                                totalRatings: total,
+                                starCounts: starCounts,
+                              );
+                            },
+                            error: (err, _) => const SizedBox(),
+                            loading: () => const Center(child: CircularProgressIndicator()),
+                          ),
+
+                      const SizedBox(height: 24),
+
+                      // Reviews List
+                      ref.watch(productReviewsProvider(productId)).when(
+                            data: (reviews) {
+                              if (reviews.isEmpty) {
+                                return const Center(
+                                  child: Padding(
+                                    padding: EdgeInsets.symmetric(vertical: 24.0),
+                                    child: Text(
+                                      'No reviews yet. Be the first to review!',
+                                      style: TextStyle(color: Colors.grey),
+                                    ),
+                                  ),
+                                );
+                              }
+
+                              return ListView.builder(
+                                shrinkWrap: true,
+                                physics: const NeverScrollableScrollPhysics(),
+                                itemCount: reviews.length,
+                                itemBuilder: (context, index) {
+                                  final r = reviews[index] as Map<String, dynamic>;
+                                  final reviewId = r['id'] as int;
+                                  final comment = r['comment'] as String;
+                                  final ratingVal = r['rating_value'] as int;
+                                  final userName = r['user_name'] ?? 'Anonymous';
+
+                                  const isMyReview = true;
+
+                                  return Card(
+                                    margin: const EdgeInsets.only(bottom: 12),
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(12.0),
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Row(
+                                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                            children: [
+                                              Text(
+                                                userName,
+                                                style: const TextStyle(
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                              ),
+                                              StarRatingWidget(
+                                                rating: ratingVal.toDouble(),
+                                                size: 16,
+                                              ),
+                                            ],
+                                          ),
+                                          const SizedBox(height: 8),
+                                          Text(comment),
+                                          if (isMyReview) ...[
+                                            const Divider(height: 16),
+                                            Row(
+                                              mainAxisAlignment: MainAxisAlignment.end,
+                                              children: [
+                                                TextButton.icon(
+                                                  style: TextButton.styleFrom(
+                                                    foregroundColor: Colors.orange,
+                                                  ),
+                                                  onPressed: () => context.go(
+                                                    '/review/edit?reviewId=$reviewId&productId=$productId&ratingValue=$ratingVal&comment=${Uri.encodeComponent(comment)}',
+                                                  ),
+                                                  icon: const Icon(Icons.edit, size: 16),
+                                                  label: const Text('Edit'),
+                                                ),
+                                                TextButton.icon(
+                                                  style: TextButton.styleFrom(
+                                                    foregroundColor: Colors.red,
+                                                  ),
+                                                  onPressed: () async {
+                                                    await ref
+                                                        .read(reviewOpsProvider.notifier)
+                                                        .deleteReview(
+                                                          reviewId,
+                                                          productId: productId,
+                                                        );
+                                                  },
+                                                  icon: const Icon(Icons.delete, size: 16),
+                                                  label: const Text('Delete'),
+                                                ),
+                                              ],
+                                            ),
+                                          ],
+                                        ],
+                                      ),
+                                    ),
+                                  );
+                                },
+                              );
+                            },
+                            error: (err, _) => Text('Error: $err'),
+                            loading: () => const Center(child: CircularProgressIndicator()),
+                          ),
                     ],
                   ),
                 ),
