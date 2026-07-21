@@ -193,4 +193,65 @@ class ApiClient {
     );
     return response.data as Map<String, dynamic>;
   }
+
+  // --- Cart & Order APIs ---
+  Future<Map<String, dynamic>> getCart() async {
+    final response = await dio.get('/api/v1/cart');
+    return response.data as Map<String, dynamic>;
+  }
+
+  Future<Map<String, dynamic>> addToCart(int productId, int quantity) async {
+    final response = await dio.post(
+      '/api/v1/cart',
+      data: {'product_id': productId, 'quantity': quantity},
+    );
+    return response.data as Map<String, dynamic>;
+  }
+
+  Future<Map<String, dynamic>> updateCartItem(int itemId, int quantity) async {
+    final response = await dio.put(
+      '/api/v1/cart/$itemId',
+      data: {'quantity': quantity},
+    );
+    return response.data as Map<String, dynamic>;
+  }
+
+  Future<Map<String, dynamic>> removeFromCart(int itemId) async {
+    final response = await dio.delete('/api/v1/cart/$itemId');
+    return response.data as Map<String, dynamic>;
+  }
+
+  Future<Map<String, dynamic>> clearCart() async {
+    final response = await dio.delete('/api/v1/cart');
+    return response.data as Map<String, dynamic>;
+  }
+
+  Future<Map<String, dynamic>> createOrder(String deliveryAddress) async {
+    final response = await dio.post(
+      '/api/v1/orders',
+      data: {'delivery_address': deliveryAddress},
+    );
+    return response.data as Map<String, dynamic>;
+  }
+
+  Future<List<dynamic>> getOrders() async {
+    final response = await dio.get('/api/v1/orders');
+    return response.data as List<dynamic>;
+  }
+
+  Future<Map<String, dynamic>> getOrderById(int orderId) async {
+    final response = await dio.get('/api/v1/orders/$orderId');
+    return response.data as Map<String, dynamic>;
+  }
+
+  Future<Map<String, dynamic>> updateOrderStatus(
+    int orderId,
+    String status,
+  ) async {
+    final response = await dio.put(
+      '/api/v1/orders/$orderId/status',
+      data: {'status': status},
+    );
+    return response.data as Map<String, dynamic>;
+  }
 }

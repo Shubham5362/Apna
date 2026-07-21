@@ -9,6 +9,10 @@ import '../views/products/product_list_view.dart';
 import '../views/products/product_details_view.dart';
 import '../views/products/create_product_view.dart';
 import '../views/products/edit_product_view.dart';
+import '../views/cart_view.dart';
+import '../views/checkout_view.dart';
+import '../views/orders/order_list_view.dart';
+import '../views/orders/order_details_view.dart';
 
 final GoRouter routerConfig = GoRouter(
   initialLocation: '/',
@@ -64,6 +68,23 @@ final GoRouter routerConfig = GoRouter(
         final idStr = state.pathParameters['id']!;
         final id = int.parse(idStr);
         return EditProductView(productId: id);
+      },
+    ),
+    GoRoute(path: '/cart', builder: (context, state) => const CartView()),
+    GoRoute(
+      path: '/checkout',
+      builder: (context, state) => const CheckoutView(),
+    ),
+    GoRoute(
+      path: '/orders',
+      builder: (context, state) => const OrderListView(),
+    ),
+    GoRoute(
+      path: '/orders/:id',
+      builder: (context, state) {
+        final idStr = state.pathParameters['id']!;
+        final id = int.parse(idStr);
+        return OrderDetailsView(orderId: id);
       },
     ),
   ],
