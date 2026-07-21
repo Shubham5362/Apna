@@ -4,23 +4,18 @@ class ApiClient {
   final Dio dio;
 
   ApiClient({String? baseUrl})
-      : dio = Dio(
-          BaseOptions(
-            baseUrl: baseUrl ?? 'http://localhost:8000',
-            connectTimeout: const Duration(seconds: 10),
-            receiveTimeout: const Duration(seconds: 10),
-            headers: {
-              'Content-Type': 'application/json',
-              'Accept': 'application/json',
-            },
-          ),
-        ) {
-    dio.interceptors.add(
-      LogInterceptor(
-        requestBody: true,
-        responseBody: true,
-      ),
-    );
+    : dio = Dio(
+        BaseOptions(
+          baseUrl: baseUrl ?? 'http://localhost:8000',
+          connectTimeout: const Duration(seconds: 10),
+          receiveTimeout: const Duration(seconds: 10),
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+          },
+        ),
+      ) {
+    dio.interceptors.add(LogInterceptor(requestBody: true, responseBody: true));
   }
 
   Future<Map<String, dynamic>> checkHealth() async {
@@ -31,10 +26,7 @@ class ApiClient {
       }
       return {'status': 'unhealthy', 'error': 'Invalid format response'};
     } catch (e) {
-      return {
-        'status': 'unhealthy',
-        'error': e.toString(),
-      };
+      return {'status': 'unhealthy', 'error': e.toString()};
     }
   }
 }
