@@ -125,6 +125,19 @@ class HealthDashboardView extends ConsumerWidget {
                     icon: const Icon(Icons.store),
                     label: const Text('Go to Shops'),
                   ),
+                  ElevatedButton.icon(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.orange,
+                      foregroundColor: Colors.white,
+                    ),
+                    onPressed: () {
+                      ref.read(authTokenProvider.notifier).state =
+                          'mock_jwt_token';
+                      context.go('/products');
+                    },
+                    icon: const Icon(Icons.shopping_bag),
+                    label: const Text('Go to Products'),
+                  ),
                 ],
               ),
             ],

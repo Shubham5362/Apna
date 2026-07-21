@@ -23,3 +23,8 @@ class Shop(Base):
 
     # Relationships
     owner = relationship("User", back_populates="shop")
+    products = relationship(
+        "Product",
+        back_populates="shop",
+        cascade="all, delete-orphan",
+    )

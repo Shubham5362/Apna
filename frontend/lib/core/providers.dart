@@ -185,3 +185,113 @@ final shopOpsProvider = StateNotifierProvider<ShopOpsNotifier, ShopOpsState>((
   final client = ref.watch(apiClientProvider);
   return ShopOpsNotifier(client, ref);
 });
+
+// --- Product state and providers ---
+final productSearchQueryProvider = StateProvider<String>((ref) => '');
+final productSelectedCategoryProvider = StateProvider<String?>((ref) => null);
+final productSelectedShopIdProvider = StateProvider<int?>((ref) => null);
+final productSortByProvider = StateProvider<String>((ref) => 'latest');
+
+final productsListProvider = FutureProvider.autoDispose<List<dynamic>>((
+  ref,
+) async {
+  final client = ref.watch(apiClientProvider);
+  final search = ref.watch(productSearchQueryProvider);
+  final category = ref.watch(productSelectedCategoryProvider);
+  final shopId = ref.watch(productSelectedShopIdProvider);
+  final sortBy = ref.watch(productSortByProvider);
+
+  return client.getProducts(
+    search: search,
+    category: category,
+    shopId: shopId,
+    sortBy: sortBy,
+  );
+});
+
+final productDetailsProvider = FutureProvider.autoDispose
+    .family<Map<String, dynamic>, int>((ref, id) async {
+      final client = ref.watch(apiClientProvider);
+      return client.getProductById(id);
+    });
+
+class ProductOpsState {
+  final bool isLoading;
+  final String? error;
+
+  ProductOpsState({this.isLoading = false, this.error});
+
+  ProductOpsState copyWith({bool? isLoading, String? error}) {
+    return ProductOpsState(
+      isLoading: isLoading ?? this.isLoading,
+      error: error ?? this.error,
+    );
+  }
+}
+
+class ProductOpsNotifier extends StateNotifier<ProductOpsState> {
+  final ApiClient _apiClient;
+  final Ref _ref;
+
+  ProductOpsNotifier(this._apiClient, this._ref) : super(ProductOpsState());
+
+  Future<Map<String, dynamic>?> createProduct(Map<String, dynamic> data) async {
+    state = ProductOpsState(isLoading: true);
+    try {
+      final product = await _apiClient.createProduct(data);
+      state = ProductOpsState(isLoading: false);
+      _ref.invalidate(productsListProvider);
+      return product;
+    } catch (e) {
+      state = ProductOpsState(isLoading: false, error: e.toString());
+      return null;
+    }
+  }
+
+  Future<bool> updateProduct(int id, Map<String, dynamic> data) async {
+    state = ProductOpsState(isLoading: true);
+    try {
+      await _apiClient.updateProduct(id, data);
+      state = ProductOpsState(isLoading: false);
+      _ref.invalidate(productsListProvider);
+      _ref.invalidate(productDetailsProvider(id));
+      return true;
+    } catch (e) {
+      state = ProductOpsState(isLoading: false, error: e.toString());
+      return false;
+    }
+  }
+
+  Future<bool> deleteProduct(int id) async {
+    state = ProductOpsState(isLoading: true);
+    try {
+      await _apiClient.deleteProduct(id);
+      state = ProductOpsState(isLoading: false);
+      _ref.invalidate(productsListProvider);
+      return true;
+    } catch (e) {
+      state = ProductOpsState(isLoading: false, error: e.toString());
+      return false;
+    }
+  }
+
+  Future<bool> uploadPhoto(int id, List<int> bytes, String filename) async {
+    state = ProductOpsState(isLoading: true);
+    try {
+      await _apiClient.uploadProductPhoto(id, bytes, filename);
+      state = ProductOpsState(isLoading: false);
+      _ref.invalidate(productsListProvider);
+      _ref.invalidate(productDetailsProvider(id));
+      return true;
+    } catch (e) {
+      state = ProductOpsState(isLoading: false, error: e.toString());
+      return false;
+    }
+  }
+}
+
+final productOpsProvider =
+    StateNotifierProvider<ProductOpsNotifier, ProductOpsState>((ref) {
+      final client = ref.watch(apiClientProvider);
+      return ProductOpsNotifier(client, ref);
+    });
