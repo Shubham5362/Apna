@@ -40,7 +40,7 @@ class OrderDetailsView extends ConsumerWidget {
               children: [
                 // Status Header
                 Card(
-                  color: _getStatusColor(status).withOpacity(0.1),
+                  color: _getStatusColor(status).withValues(alpha: 0.1),
                   elevation: 0,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
