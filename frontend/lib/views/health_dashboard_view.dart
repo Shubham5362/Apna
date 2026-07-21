@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../core/providers.dart';
 
 class HealthDashboardView extends ConsumerWidget {
@@ -88,10 +89,30 @@ class HealthDashboardView extends ConsumerWidget {
                 ),
               ),
               const SizedBox(height: 24),
-              ElevatedButton.icon(
-                onPressed: () => ref.refresh(healthCheckProvider),
-                icon: const Icon(Icons.refresh),
-                label: const Text('Refresh Status'),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  ElevatedButton.icon(
+                    onPressed: () => ref.refresh(healthCheckProvider),
+                    icon: const Icon(Icons.refresh),
+                    label: const Text('Refresh Status'),
+                  ),
+                  const SizedBox(width: 16),
+                  ElevatedButton.icon(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blue,
+                      foregroundColor: Colors.white,
+                    ),
+                    onPressed: () {
+                      // Simulating being authenticated for demonstration / MVP
+                      ref.read(authTokenProvider.notifier).state =
+                          'mock_jwt_token';
+                      context.go('/profile');
+                    },
+                    icon: const Icon(Icons.person),
+                    label: const Text('Go to User Profile'),
+                  ),
+                ],
               ),
             ],
           ),
