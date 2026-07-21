@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../core/providers.dart';
 
 class UserProfileView extends ConsumerStatefulWidget {
@@ -446,6 +447,29 @@ class _UserProfileViewState extends ConsumerState<UserProfileView> {
                         label: Text(
                           profileState.isLoading ? 'Saving...' : 'Save Profile',
                           style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+
+                    // Payment History Button
+                    SizedBox(
+                      width: double.infinity,
+                      height: 50,
+                      child: OutlinedButton.icon(
+                        style: OutlinedButton.styleFrom(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                        onPressed: () => context.go('/payments/history'),
+                        icon: const Icon(Icons.history),
+                        label: const Text(
+                          'View Payment History',
+                          style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
                           ),

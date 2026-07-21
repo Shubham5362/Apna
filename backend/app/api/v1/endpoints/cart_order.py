@@ -175,6 +175,12 @@ def clear_cart(
     return get_cart(current_user=current_user, db=db)
 
 
+def get_order_payment_status(db: Session, order_id: int) -> str:
+    from app.models.payment import Payment
+    payment = db.query(Payment).filter(Payment.order_id == order_id).order_by(Payment.created_at.desc()).first()
+    return payment.status if payment else "Pending"
+
+
 # --- Order Endpoints ---
 
 
@@ -271,6 +277,7 @@ def create_order(
         created_at=order.created_at,
         updated_at=order.updated_at,
         items=order_items_response,
+        payment_status=get_order_payment_status(db, order.id),
     )
 
 
@@ -309,6 +316,7 @@ def read_orders(
                 created_at=order.created_at,
                 updated_at=order.updated_at,
                 items=items_response,
+                payment_status=get_order_payment_status(db, order.id),
             )
         )
     return response
@@ -353,6 +361,7 @@ def read_order_by_id(
         created_at=order.created_at,
         updated_at=order.updated_at,
         items=items_response,
+        payment_status=get_order_payment_status(db, order.id),
     )
 
 

@@ -254,4 +254,37 @@ class ApiClient {
     );
     return response.data as Map<String, dynamic>;
   }
+
+  // --- Payment APIs ---
+  Future<Map<String, dynamic>> createPayment(
+    int orderId,
+    String paymentMethod,
+  ) async {
+    final response = await dio.post(
+      '/api/v1/payments/create',
+      data: {'order_id': orderId, 'payment_method': paymentMethod},
+    );
+    return response.data as Map<String, dynamic>;
+  }
+
+  Future<Map<String, dynamic>> verifyPayment(
+    String razorpayOrderId,
+    String razorpayPaymentId,
+    String razorpaySignature,
+  ) async {
+    final response = await dio.post(
+      '/api/v1/payments/verify',
+      data: {
+        'razorpay_order_id': razorpayOrderId,
+        'razorpay_payment_id': razorpayPaymentId,
+        'razorpay_signature': razorpaySignature,
+      },
+    );
+    return response.data as Map<String, dynamic>;
+  }
+
+  Future<List<dynamic>> getPaymentHistory() async {
+    final response = await dio.get('/api/v1/payments/history');
+    return response.data as List<dynamic>;
+  }
 }

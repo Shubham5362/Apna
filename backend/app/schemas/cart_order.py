@@ -53,6 +53,7 @@ class OrderResponse(BaseModel):
     created_at: datetime
     updated_at: Optional[datetime] = None
     items: List[OrderItemResponse]
+    payment_status: str = "Pending"
 
     class Config:
         from_attributes = True
