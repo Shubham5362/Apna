@@ -89,28 +89,54 @@ class HealthDashboardView extends ConsumerWidget {
                 ),
               ),
               const SizedBox(height: 24),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
+              Wrap(
+                spacing: 12,
+                runSpacing: 12,
+                alignment: WrapAlignment.center,
                 children: [
                   ElevatedButton.icon(
                     onPressed: () => ref.refresh(healthCheckProvider),
                     icon: const Icon(Icons.refresh),
                     label: const Text('Refresh Status'),
                   ),
-                  const SizedBox(width: 16),
                   ElevatedButton.icon(
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.blue,
                       foregroundColor: Colors.white,
                     ),
                     onPressed: () {
-                      // Simulating being authenticated for demonstration / MVP
                       ref.read(authTokenProvider.notifier).state =
                           'mock_jwt_token';
                       context.go('/profile');
                     },
                     icon: const Icon(Icons.person),
                     label: const Text('Go to User Profile'),
+                  ),
+                  ElevatedButton.icon(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.green,
+                      foregroundColor: Colors.white,
+                    ),
+                    onPressed: () {
+                      ref.read(authTokenProvider.notifier).state =
+                          'mock_jwt_token';
+                      context.go('/shops');
+                    },
+                    icon: const Icon(Icons.store),
+                    label: const Text('Go to Shops'),
+                  ),
+                  ElevatedButton.icon(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.orange,
+                      foregroundColor: Colors.white,
+                    ),
+                    onPressed: () {
+                      ref.read(authTokenProvider.notifier).state =
+                          'mock_jwt_token';
+                      context.go('/products');
+                    },
+                    icon: const Icon(Icons.shopping_bag),
+                    label: const Text('Go to Products'),
                   ),
                 ],
               ),

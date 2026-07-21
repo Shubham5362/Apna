@@ -20,3 +20,9 @@ class User(Base):
         uselist=False,
         cascade="all, delete-orphan",
     )
+    shop = relationship(
+        "Shop",
+        back_populates="owner",
+        uselist=False,
+        cascade="all, delete-orphan",
+    )

@@ -45,6 +45,7 @@ class ApiClient {
     }
   }
 
+  // --- Profile APIs ---
   Future<Map<String, dynamic>> getProfile() async {
     final response = await dio.get('/api/v1/profile');
     return response.data as Map<String, dynamic>;
@@ -67,6 +68,129 @@ class ApiClient {
       ),
     });
     final response = await dio.post('/api/v1/profile/photo', data: formData);
+    return response.data as Map<String, dynamic>;
+  }
+
+  // --- Shop APIs ---
+  Future<List<dynamic>> getShops() async {
+    final response = await dio.get('/api/v1/shops');
+    return response.data as List<dynamic>;
+  }
+
+  Future<Map<String, dynamic>> getShopById(int id) async {
+    final response = await dio.get('/api/v1/shops/$id');
+    return response.data as Map<String, dynamic>;
+  }
+
+  Future<Map<String, dynamic>> createShop(Map<String, dynamic> data) async {
+    final response = await dio.post('/api/v1/shops', data: data);
+    return response.data as Map<String, dynamic>;
+  }
+
+  Future<Map<String, dynamic>> updateShop(
+    int id,
+    Map<String, dynamic> data,
+  ) async {
+    final response = await dio.put('/api/v1/shops/$id', data: data);
+    return response.data as Map<String, dynamic>;
+  }
+
+  Future<Map<String, dynamic>> deleteShop(int id) async {
+    final response = await dio.delete('/api/v1/shops/$id');
+    return response.data as Map<String, dynamic>;
+  }
+
+  Future<Map<String, dynamic>> uploadShopPhoto(
+    int id,
+    List<int> bytes,
+    String filename,
+  ) async {
+    final formData = FormData.fromMap({
+      'file': MultipartFile.fromBytes(
+        bytes,
+        filename: filename,
+        contentType: DioMediaType('image', 'png'),
+      ),
+    });
+    final response = await dio.post('/api/v1/shops/$id/photo', data: formData);
+    return response.data as Map<String, dynamic>;
+  }
+
+  // --- Product APIs ---
+  Future<List<dynamic>> getProducts({
+    String? search,
+    String? category,
+    int? shopId,
+    String? sortBy,
+    int? skip,
+    int? limit,
+  }) async {
+    final Map<String, dynamic> queryParams = {};
+    if (search != null && search.isNotEmpty) {
+      queryParams['search'] = search;
+    }
+    if (category != null && category.isNotEmpty) {
+      queryParams['category'] = category;
+    }
+    if (shopId != null) {
+      queryParams['shop_id'] = shopId;
+    }
+    if (sortBy != null && sortBy.isNotEmpty) {
+      queryParams['sort_by'] = sortBy;
+    }
+    if (skip != null) {
+      queryParams['skip'] = skip;
+    }
+    if (limit != null) {
+      queryParams['limit'] = limit;
+    }
+
+    final response = await dio.get(
+      '/api/v1/products',
+      queryParameters: queryParams,
+    );
+    return response.data as List<dynamic>;
+  }
+
+  Future<Map<String, dynamic>> getProductById(int id) async {
+    final response = await dio.get('/api/v1/products/$id');
+    return response.data as Map<String, dynamic>;
+  }
+
+  Future<Map<String, dynamic>> createProduct(Map<String, dynamic> data) async {
+    final response = await dio.post('/api/v1/products', data: data);
+    return response.data as Map<String, dynamic>;
+  }
+
+  Future<Map<String, dynamic>> updateProduct(
+    int id,
+    Map<String, dynamic> data,
+  ) async {
+    final response = await dio.put('/api/v1/products/$id', data: data);
+    return response.data as Map<String, dynamic>;
+  }
+
+  Future<Map<String, dynamic>> deleteProduct(int id) async {
+    final response = await dio.delete('/api/v1/products/$id');
+    return response.data as Map<String, dynamic>;
+  }
+
+  Future<Map<String, dynamic>> uploadProductPhoto(
+    int id,
+    List<int> bytes,
+    String filename,
+  ) async {
+    final formData = FormData.fromMap({
+      'file': MultipartFile.fromBytes(
+        bytes,
+        filename: filename,
+        contentType: DioMediaType('image', 'png'),
+      ),
+    });
+    final response = await dio.post(
+      '/api/v1/products/$id/photo',
+      data: formData,
+    );
     return response.data as Map<String, dynamic>;
   }
 }
