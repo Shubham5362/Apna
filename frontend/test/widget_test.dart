@@ -5,6 +5,7 @@ import 'package:frontend/main.dart';
 import 'package:frontend/core/api_client.dart';
 import 'package:frontend/core/providers.dart';
 import 'package:frontend/views/user_profile_view.dart';
+import 'package:frontend/views/shops/shop_list_view.dart';
 
 class MockApiClient extends ApiClient {
   MockApiClient() : super(baseUrl: 'http://localhost:8000');
@@ -39,6 +40,22 @@ class MockApiClient extends ApiClient {
       'completion_percentage': 92,
     };
   }
+
+  @override
+  Future<List<dynamic>> getShops() async {
+    return [
+      {
+        'id': 1,
+        'name': 'Gorganic Grocery',
+        'description': 'Fresh organic vegetables',
+        'owner_id': 1,
+        'image_url': null,
+        'is_active': true,
+        'created_at': '2026-07-21T12:00:00Z',
+        'updated_at': null,
+      },
+    ];
+  }
 }
 
 void main() {
@@ -60,9 +77,10 @@ void main() {
     expect(find.text('System Status Check'), findsOneWidget);
 
     // Verify that the buttons are rendered.
-    expect(find.byType(ElevatedButton), findsNWidgets(2));
+    expect(find.byType(ElevatedButton), findsNWidgets(3));
     expect(find.text('Refresh Status'), findsOneWidget);
     expect(find.text('Go to User Profile'), findsOneWidget);
+    expect(find.text('Go to Shops'), findsOneWidget);
 
     // Let the pending async microtasks complete
     await tester.pumpAndSettle();
@@ -98,5 +116,29 @@ void main() {
 
     // Verify save button exists
     expect(find.text('Save Profile'), findsOneWidget);
+  });
+
+  testWidgets('Apna Mandla Shops Screen UI test', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          apiClientProvider.overrideWithValue(MockApiClient()),
+          authTokenProvider.overrideWith((ref) => 'mock_jwt_token'),
+        ],
+        child: const MaterialApp(home: ShopListView()),
+      ),
+    );
+
+    // Initial frame
+    await tester.pump();
+    await tester.pumpAndSettle();
+
+    // Verify shop elements
+    expect(find.text('Local Shops'), findsOneWidget);
+    expect(find.text('Gorganic Grocery'), findsOneWidget);
+    expect(find.text('Fresh organic vegetables'), findsOneWidget);
+
+    // Verify Add Shop button exists
+    expect(find.text('Add Shop'), findsOneWidget);
   });
 }

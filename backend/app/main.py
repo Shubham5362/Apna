@@ -37,6 +37,7 @@ register_exception_handlers(app)
 
 # 5. Register APIRouters
 os.makedirs("uploads/profile_photos", exist_ok=True)
+os.makedirs("uploads/shops", exist_ok=True)
 app.mount("/static", StaticFiles(directory="uploads"), name="static")
 
 app.include_router(api_router, prefix=settings.API_V1_STR)

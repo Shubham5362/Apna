@@ -21,6 +21,7 @@ final healthCheckProvider = FutureProvider.autoDispose<Map<String, dynamic>>((
   return apiClient.checkHealth();
 });
 
+// --- Profile state ---
 class UserProfileState {
   final Map<String, dynamic>? profile;
   final bool isLoading;
@@ -88,3 +89,99 @@ final userProfileProvider =
       final client = ref.watch(apiClientProvider);
       return UserProfileNotifier(client);
     });
+
+// --- Shop state and providers ---
+final shopsListProvider = FutureProvider.autoDispose<List<dynamic>>((
+  ref,
+) async {
+  final client = ref.watch(apiClientProvider);
+  return client.getShops();
+});
+
+final shopDetailsProvider = FutureProvider.autoDispose
+    .family<Map<String, dynamic>, int>((ref, id) async {
+      final client = ref.watch(apiClientProvider);
+      return client.getShopById(id);
+    });
+
+class ShopOpsState {
+  final bool isLoading;
+  final String? error;
+
+  ShopOpsState({this.isLoading = false, this.error});
+
+  ShopOpsState copyWith({bool? isLoading, String? error}) {
+    return ShopOpsState(
+      isLoading: isLoading ?? this.isLoading,
+      error: error ?? this.error,
+    );
+  }
+}
+
+class ShopOpsNotifier extends StateNotifier<ShopOpsState> {
+  final ApiClient _apiClient;
+  final Ref _ref;
+
+  ShopOpsNotifier(this._apiClient, this._ref) : super(ShopOpsState());
+
+  Future<Map<String, dynamic>?> createShop(Map<String, dynamic> data) async {
+    state = ShopOpsState(isLoading: true);
+    try {
+      final shop = await _apiClient.createShop(data);
+      state = ShopOpsState(isLoading: false);
+      _ref.invalidate(shopsListProvider);
+      return shop;
+    } catch (e) {
+      state = ShopOpsState(isLoading: false, error: e.toString());
+      return null;
+    }
+  }
+
+  Future<bool> updateShop(int id, Map<String, dynamic> data) async {
+    state = ShopOpsState(isLoading: true);
+    try {
+      await _apiClient.updateShop(id, data);
+      state = ShopOpsState(isLoading: false);
+      _ref.invalidate(shopsListProvider);
+      _ref.invalidate(shopDetailsProvider(id));
+      return true;
+    } catch (e) {
+      state = ShopOpsState(isLoading: false, error: e.toString());
+      return false;
+    }
+  }
+
+  Future<bool> deleteShop(int id) async {
+    state = ShopOpsState(isLoading: true);
+    try {
+      await _apiClient.deleteShop(id);
+      state = ShopOpsState(isLoading: false);
+      _ref.invalidate(shopsListProvider);
+      return true;
+    } catch (e) {
+      state = ShopOpsState(isLoading: false, error: e.toString());
+      return false;
+    }
+  }
+
+  Future<bool> uploadPhoto(int id, List<int> bytes, String filename) async {
+    state = ShopOpsState(isLoading: true);
+    try {
+      await _apiClient.uploadShopPhoto(id, bytes, filename);
+      state = ShopOpsState(isLoading: false);
+      _ref.invalidate(shopsListProvider);
+      _ref.invalidate(shopDetailsProvider(id));
+      return true;
+    } catch (e) {
+      state = ShopOpsState(isLoading: false, error: e.toString());
+      return false;
+    }
+  }
+}
+
+final shopOpsProvider = StateNotifierProvider<ShopOpsNotifier, ShopOpsState>((
+  ref,
+) {
+  final client = ref.watch(apiClientProvider);
+  return ShopOpsNotifier(client, ref);
+});

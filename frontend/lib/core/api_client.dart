@@ -45,6 +45,7 @@ class ApiClient {
     }
   }
 
+  // --- Profile APIs ---
   Future<Map<String, dynamic>> getProfile() async {
     final response = await dio.get('/api/v1/profile');
     return response.data as Map<String, dynamic>;
@@ -67,6 +68,51 @@ class ApiClient {
       ),
     });
     final response = await dio.post('/api/v1/profile/photo', data: formData);
+    return response.data as Map<String, dynamic>;
+  }
+
+  // --- Shop APIs ---
+  Future<List<dynamic>> getShops() async {
+    final response = await dio.get('/api/v1/shops');
+    return response.data as List<dynamic>;
+  }
+
+  Future<Map<String, dynamic>> getShopById(int id) async {
+    final response = await dio.get('/api/v1/shops/$id');
+    return response.data as Map<String, dynamic>;
+  }
+
+  Future<Map<String, dynamic>> createShop(Map<String, dynamic> data) async {
+    final response = await dio.post('/api/v1/shops', data: data);
+    return response.data as Map<String, dynamic>;
+  }
+
+  Future<Map<String, dynamic>> updateShop(
+    int id,
+    Map<String, dynamic> data,
+  ) async {
+    final response = await dio.put('/api/v1/shops/$id', data: data);
+    return response.data as Map<String, dynamic>;
+  }
+
+  Future<Map<String, dynamic>> deleteShop(int id) async {
+    final response = await dio.delete('/api/v1/shops/$id');
+    return response.data as Map<String, dynamic>;
+  }
+
+  Future<Map<String, dynamic>> uploadShopPhoto(
+    int id,
+    List<int> bytes,
+    String filename,
+  ) async {
+    final formData = FormData.fromMap({
+      'file': MultipartFile.fromBytes(
+        bytes,
+        filename: filename,
+        contentType: DioMediaType('image', 'png'),
+      ),
+    });
+    final response = await dio.post('/api/v1/shops/$id/photo', data: formData);
     return response.data as Map<String, dynamic>;
   }
 }

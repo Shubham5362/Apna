@@ -1,14 +1,24 @@
 import io
+import pytest
 from sqlalchemy.orm import Session
 from fastapi.testclient import TestClient
 
 from app.main import app
-from app.core.deps import get_db
+from app.core.database import SessionLocal
 from app.models.user import User
 from app.models.user_profile import UserProfile
 from app.core.security import create_access_token
 
 client = TestClient(app)
+
+
+@pytest.fixture(name="db")
+def db_fixture():
+    session = SessionLocal()
+    try:
+        yield session
+    finally:
+        session.close()
 
 
 def get_auth_token(db: Session, phone_number: str = "+919999999999", full_name: str = "Profile Test User") -> str:
@@ -27,7 +37,7 @@ def test_get_profile_unauthenticated():
     assert response.status_code == 401
 
 
-def test_get_profile_success(db: Session = next(get_db())):
+def test_get_profile_success(db: Session):
     token = get_auth_token(db, "+919999999999")
     response = client.get(
         "/api/v1/profile",
@@ -41,7 +51,7 @@ def test_get_profile_success(db: Session = next(get_db())):
     assert data["completion_percentage"] == 8  # Only 1 field filled: full_name (1/12 ≈ 8%)
 
 
-def test_update_profile_success(db: Session = next(get_db())):
+def test_update_profile_success(db: Session):
     token = get_auth_token(db, "+919999999999")
     update_data = {
         "full_name": "Updated Name",
@@ -78,7 +88,7 @@ def test_update_profile_success(db: Session = next(get_db())):
     assert data["completion_percentage"] == 92
 
 
-def test_update_profile_validation_invalid_email(db: Session = next(get_db())):
+def test_update_profile_validation_invalid_email(db: Session):
     token = get_auth_token(db, "+919999999999")
     update_data = {
         "email": "invalid-email-format",
@@ -99,7 +109,7 @@ def test_upload_profile_photo_unauthenticated():
     assert response.status_code == 401
 
 
-def test_upload_profile_photo_invalid_type(db: Session = next(get_db())):
+def test_upload_profile_photo_invalid_type(db: Session):
     token = get_auth_token(db, "+919999999999")
     response = client.post(
         "/api/v1/profile/photo",
@@ -110,7 +120,7 @@ def test_upload_profile_photo_invalid_type(db: Session = next(get_db())):
     assert "File must be an image" in response.json()["error"]["message"]
 
 
-def test_upload_profile_photo_success(db: Session = next(get_db())):
+def test_upload_profile_photo_success(db: Session):
     token = get_auth_token(db, "+919999999999")
     dummy_image = io.BytesIO(b"fake image data")
     response = client.post(
