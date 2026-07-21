@@ -21,6 +21,7 @@ from app.models.shop import Shop
 from app.models.product import Product
 from app.models.cart import CartItem
 from app.models.order import Order, OrderItem
+from app.models.payment import Payment
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

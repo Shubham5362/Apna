@@ -53,13 +53,13 @@ class _CheckoutViewState extends ConsumerState<CheckoutView> {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
               content: Text(
-                'Order placed successfully! Thank you for shopping.',
+                'Order placed successfully! Proceeding to payment...',
               ),
               backgroundColor: Colors.green,
             ),
           );
           final id = order['id'] as int;
-          context.go('/orders/$id');
+          context.go('/payment/$id');
         } else {
           final error = ref.read(orderOpsProvider).error;
           ScaffoldMessenger.of(context).showSnackBar(

@@ -44,5 +44,10 @@ class Settings(BaseSettings):
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 7  # 7 days
 
+    # Razorpay
+    RAZORPAY_KEY_ID: str = "rzp_test_mockkey"
+    RAZORPAY_KEY_SECRET: str = "mocksecret"
+    RAZORPAY_WEBHOOK_SECRET: str = "mockwebhooksecret"
+
 
 settings = Settings()

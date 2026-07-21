@@ -13,6 +13,10 @@ import '../views/cart_view.dart';
 import '../views/checkout_view.dart';
 import '../views/orders/order_list_view.dart';
 import '../views/orders/order_details_view.dart';
+import '../views/payment_view.dart';
+import '../views/payment_success_view.dart';
+import '../views/payment_failed_view.dart';
+import '../views/payment_history_view.dart';
 
 final GoRouter routerConfig = GoRouter(
   initialLocation: '/',
@@ -86,6 +90,35 @@ final GoRouter routerConfig = GoRouter(
         final id = int.parse(idStr);
         return OrderDetailsView(orderId: id);
       },
+    ),
+    GoRoute(
+      path: '/payment/:orderId',
+      builder: (context, state) {
+        final orderIdStr = state.pathParameters['orderId']!;
+        final orderId = int.parse(orderIdStr);
+        return PaymentView(orderId: orderId);
+      },
+    ),
+    GoRoute(
+      path: '/payment/success',
+      builder: (context, state) {
+        final orderIdStr = state.uri.queryParameters['orderId'] ?? '0';
+        final orderId = int.parse(orderIdStr);
+        final paymentId = state.uri.queryParameters['paymentId'] ?? 'N/A';
+        return PaymentSuccessView(orderId: orderId, paymentId: paymentId);
+      },
+    ),
+    GoRoute(
+      path: '/payment/failed',
+      builder: (context, state) {
+        final orderIdStr = state.uri.queryParameters['orderId'] ?? '0';
+        final orderId = int.parse(orderIdStr);
+        return PaymentFailedView(orderId: orderId);
+      },
+    ),
+    GoRoute(
+      path: '/payments/history',
+      builder: (context, state) => const PaymentHistoryView(),
     ),
   ],
 );

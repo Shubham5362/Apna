@@ -80,6 +80,91 @@ class OrderDetailsView extends ConsumerWidget {
                     ),
                   ),
                 ),
+                const SizedBox(height: 12),
+
+                // Payment Status Card
+                Card(
+                  color:
+                      ((order['payment_status'] ?? 'Pending')
+                                      .toString()
+                                      .toLowerCase() ==
+                                  'success'
+                              ? Colors.green
+                              : Colors.orange)
+                          .withValues(alpha: 0.1),
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'Payment Status',
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Colors.grey,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              (order['payment_status'] ?? 'Pending')
+                                  .toString()
+                                  .toUpperCase(),
+                              style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                                color:
+                                    (order['payment_status'] ?? 'Pending')
+                                            .toString()
+                                            .toLowerCase() ==
+                                        'success'
+                                    ? Colors.green
+                                    : Colors.orange,
+                              ),
+                            ),
+                          ],
+                        ),
+                        if ((order['payment_status'] ?? 'Pending')
+                                    .toString()
+                                    .toLowerCase() !=
+                                'success' &&
+                            status.toLowerCase() != 'cancelled')
+                          ElevatedButton.icon(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.blue,
+                              foregroundColor: Colors.white,
+                            ),
+                            onPressed: () => context.go('/payment/$orderId'),
+                            icon: const Icon(Icons.payment),
+                            label: const Text('Pay Now'),
+                          )
+                        else
+                          Icon(
+                            (order['payment_status'] ?? 'Pending')
+                                        .toString()
+                                        .toLowerCase() ==
+                                    'success'
+                                ? Icons.check_circle_outlined
+                                : Icons.error_outline,
+                            size: 36,
+                            color:
+                                (order['payment_status'] ?? 'Pending')
+                                        .toString()
+                                        .toLowerCase() ==
+                                    'success'
+                                ? Colors.green
+                                : Colors.orange,
+                          ),
+                      ],
+                    ),
+                  ),
+                ),
                 const SizedBox(height: 24),
 
                 // Order metadata

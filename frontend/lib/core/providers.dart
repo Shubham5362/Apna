@@ -457,3 +457,78 @@ final orderOpsProvider = StateNotifierProvider<OrderOpsNotifier, OrderOpsState>(
     return OrderOpsNotifier(client, ref);
   },
 );
+
+// --- Payment state and providers ---
+final paymentHistoryProvider = FutureProvider.autoDispose<List<dynamic>>((
+  ref,
+) async {
+  final client = ref.watch(apiClientProvider);
+  return client.getPaymentHistory();
+});
+
+class PaymentOpsState {
+  final bool isLoading;
+  final String? error;
+
+  PaymentOpsState({this.isLoading = false, this.error});
+
+  PaymentOpsState copyWith({bool? isLoading, String? error}) {
+    return PaymentOpsState(
+      isLoading: isLoading ?? this.isLoading,
+      error: error ?? this.error,
+    );
+  }
+}
+
+class PaymentOpsNotifier extends StateNotifier<PaymentOpsState> {
+  final ApiClient _apiClient;
+  final Ref _ref;
+
+  PaymentOpsNotifier(this._apiClient, this._ref) : super(PaymentOpsState());
+
+  Future<Map<String, dynamic>?> createPayment(
+    int orderId,
+    String paymentMethod,
+  ) async {
+    state = PaymentOpsState(isLoading: true);
+    try {
+      final payment = await _apiClient.createPayment(orderId, paymentMethod);
+      state = PaymentOpsState(isLoading: false);
+      _ref.invalidate(paymentHistoryProvider);
+      return payment;
+    } catch (e) {
+      state = PaymentOpsState(isLoading: false, error: e.toString());
+      return null;
+    }
+  }
+
+  Future<Map<String, dynamic>?> verifyPayment({
+    required String razorpayOrderId,
+    required String razorpayPaymentId,
+    required String razorpaySignature,
+    required int orderId,
+  }) async {
+    state = PaymentOpsState(isLoading: true);
+    try {
+      final verified = await _apiClient.verifyPayment(
+        razorpayOrderId,
+        razorpayPaymentId,
+        razorpaySignature,
+      );
+      state = PaymentOpsState(isLoading: false);
+      _ref.invalidate(paymentHistoryProvider);
+      _ref.invalidate(ordersListProvider);
+      _ref.invalidate(orderDetailsProvider(orderId));
+      return verified;
+    } catch (e) {
+      state = PaymentOpsState(isLoading: false, error: e.toString());
+      return null;
+    }
+  }
+}
+
+final paymentOpsProvider =
+    StateNotifierProvider<PaymentOpsNotifier, PaymentOpsState>((ref) {
+      final client = ref.watch(apiClientProvider);
+      return PaymentOpsNotifier(client, ref);
+    });
