@@ -147,7 +147,8 @@ void main() {
     expect(find.text('System Status Check'), findsOneWidget);
 
     // Verify that the buttons are rendered.
-    expect(find.byType(ElevatedButton), findsNWidgets(6));
+    expect(find.byType(ElevatedButton), findsNWidgets(7));
+    expect(find.text('🔐 Premium Login (Apna Mandla)'), findsOneWidget);
     expect(find.text('Refresh Status'), findsOneWidget);
     expect(find.text('Go to User Profile'), findsOneWidget);
     expect(find.text('Go to Shops'), findsOneWidget);
