@@ -1,6 +1,6 @@
 from typing import Any, List, Optional
 from fastapi import APIRouter, Depends, HTTPException, status, Query
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 
 from app.core.deps import get_db, get_current_user
 from app.models.user import User
@@ -53,28 +53,35 @@ def create_review(
                 detail="You have already reviewed this shop.",
             )
 
-    # 1. Create Rating
-    rating = Rating(
-        user_id=current_user.id,
-        product_id=review_in.product_id,
-        shop_id=review_in.shop_id,
-        rating_value=review_in.rating_value,
-    )
-    db.add(rating)
-    db.commit()
-    db.refresh(rating)
+    try:
+        # 1. Create Rating
+        rating = Rating(
+            user_id=current_user.id,
+            product_id=review_in.product_id,
+            shop_id=review_in.shop_id,
+            rating_value=review_in.rating_value,
+        )
+        db.add(rating)
+        db.flush()
 
-    # 2. Create Review
-    review = Review(
-        user_id=current_user.id,
-        product_id=review_in.product_id,
-        shop_id=review_in.shop_id,
-        rating_id=rating.id,
-        comment=review_in.comment,
-    )
-    db.add(review)
-    db.commit()
-    db.refresh(review)
+        # 2. Create Review
+        review = Review(
+            user_id=current_user.id,
+            product_id=review_in.product_id,
+            shop_id=review_in.shop_id,
+            rating_id=rating.id,
+            comment=review_in.comment,
+        )
+        db.add(review)
+        db.commit()
+        db.refresh(rating)
+        db.refresh(review)
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to create rating and review: {str(e)}",
+        )
 
     return ReviewResponse(
         id=review.id,
@@ -100,7 +107,10 @@ def get_reviews(
     """
     Retrieve reviews with optional pagination and filtering.
     """
-    query = db.query(Review)
+    query = db.query(Review).options(
+        joinedload(Review.user),
+        joinedload(Review.rating)
+    )
     if product_id:
         query = query.filter(Review.product_id == product_id)
     if shop_id:
@@ -110,11 +120,8 @@ def get_reviews(
 
     response = []
     for r in reviews:
-        # Load user name and rating value
-        user = db.query(User).filter(User.id == r.user_id).first()
-        user_name = user.full_name if user else "Anonymous"
-        rating = db.query(Rating).filter(Rating.id == r.rating_id).first()
-        rating_val = rating.rating_value if rating else 0
+        user_name = r.user.full_name if r.user else "Anonymous"
+        rating_val = r.rating.rating_value if r.rating else 0
 
         response.append(
             ReviewResponse(

@@ -306,7 +306,7 @@ class ShopDetailsView extends ConsumerWidget {
                                   final reviewUserId = r['user_id'] as int?;
 
                                   final isMyReview =
-                                      currentUserId == null ||
+                                      currentUserId != null &&
                                       currentUserId == reviewUserId;
 
                                   return Card(
