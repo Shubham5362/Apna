@@ -126,7 +126,9 @@ final GoRouter routerConfig = GoRouter(
       builder: (context, state) {
         final productIdStr = state.uri.queryParameters['productId'];
         final shopIdStr = state.uri.queryParameters['shopId'];
-        final productId = productIdStr != null ? int.tryParse(productIdStr) : null;
+        final productId = productIdStr != null
+            ? int.tryParse(productIdStr)
+            : null;
         final shopId = shopIdStr != null ? int.tryParse(shopIdStr) : null;
         return WriteReviewView(productId: productId, shopId: shopId);
       },
@@ -138,7 +140,9 @@ final GoRouter routerConfig = GoRouter(
         final reviewId = int.parse(reviewIdStr);
         final productIdStr = state.uri.queryParameters['productId'];
         final shopIdStr = state.uri.queryParameters['shopId'];
-        final productId = productIdStr != null ? int.tryParse(productIdStr) : null;
+        final productId = productIdStr != null
+            ? int.tryParse(productIdStr)
+            : null;
         final shopId = shopIdStr != null ? int.tryParse(shopIdStr) : null;
         final ratingValueStr = state.uri.queryParameters['ratingValue'] ?? '5';
         final ratingValue = int.parse(ratingValueStr);

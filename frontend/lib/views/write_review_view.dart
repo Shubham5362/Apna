@@ -33,7 +33,9 @@ class _WriteReviewViewState extends ConsumerState<WriteReviewView> {
   void initState() {
     super.initState();
     _ratingValue = widget.initialRating ?? 5;
-    _commentController = TextEditingController(text: widget.initialComment ?? '');
+    _commentController = TextEditingController(
+      text: widget.initialComment ?? '',
+    );
   }
 
   @override
@@ -132,9 +134,9 @@ class _WriteReviewViewState extends ConsumerState<WriteReviewView> {
                 isEditing
                     ? 'How would you rate it now?'
                     : 'How would you rate this item?',
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
+                style: Theme.of(
+                  context,
+                ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 12),
               Center(
@@ -149,9 +151,9 @@ class _WriteReviewViewState extends ConsumerState<WriteReviewView> {
               const SizedBox(height: 24),
               Text(
                 'Tell us more about your experience',
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
+                style: Theme.of(
+                  context,
+                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 12),
               TextFormField(

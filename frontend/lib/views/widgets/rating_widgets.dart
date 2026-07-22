@@ -32,12 +32,10 @@ class StarRatingWidget extends StatelessWidget {
         }
 
         return GestureDetector(
-          onTap: onRatingChanged != null ? () => onRatingChanged!(iconIndex) : null,
-          child: Icon(
-            icon,
-            size: size,
-            color: color,
-          ),
+          onTap: onRatingChanged != null
+              ? () => onRatingChanged!(iconIndex)
+              : null,
+          child: Icon(icon, size: size, color: color),
         );
       }),
     );
@@ -96,7 +94,10 @@ class RatingSummaryWidget extends StatelessWidget {
                   children: [
                     Text(
                       '$star',
-                      style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                      style: const TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                     const SizedBox(width: 8),
                     const Icon(Icons.star, size: 12, color: Colors.amber),
@@ -118,7 +119,10 @@ class RatingSummaryWidget extends StatelessWidget {
                       child: Text(
                         '$count',
                         textAlign: TextAlign.end,
-                        style: const TextStyle(fontSize: 12, color: Colors.grey),
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey,
+                        ),
                       ),
                     ),
                   ],

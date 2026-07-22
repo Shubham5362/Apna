@@ -148,7 +148,8 @@ void main() {
         ),
         GoRoute(
           path: '/products/1',
-          builder: (context, state) => const Scaffold(body: Text('Product Details Page')),
+          builder: (context, state) =>
+              const Scaffold(body: Text('Product Details Page')),
         ),
       ],
     );

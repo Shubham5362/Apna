@@ -319,7 +319,10 @@ class ApiClient {
     if (skip != null) queryParams['skip'] = skip;
     if (limit != null) queryParams['limit'] = limit;
 
-    final response = await dio.get('/api/v1/reviews', queryParameters: queryParams);
+    final response = await dio.get(
+      '/api/v1/reviews',
+      queryParameters: queryParams,
+    );
     return response.data as List<dynamic>;
   }
 
@@ -349,7 +352,10 @@ class ApiClient {
     if (productId != null) queryParams['product_id'] = productId;
     if (shopId != null) queryParams['shop_id'] = shopId;
 
-    final response = await dio.get('/api/v1/reviews/summary', queryParameters: queryParams);
+    final response = await dio.get(
+      '/api/v1/reviews/summary',
+      queryParameters: queryParams,
+    );
     return response.data as Map<String, dynamic>;
   }
 }
