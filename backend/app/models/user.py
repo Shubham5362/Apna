@@ -20,6 +20,16 @@ class User(Base):
         uselist=False,
         cascade="all, delete-orphan",
     )
+    ratings = relationship(
+        "Rating",
+        back_populates="user",
+        cascade="all, delete-orphan",
+    )
+    reviews = relationship(
+        "Review",
+        back_populates="user",
+        cascade="all, delete-orphan",
+    )
     shop = relationship(
         "Shop",
         back_populates="owner",

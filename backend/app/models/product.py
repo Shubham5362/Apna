@@ -27,3 +27,13 @@ class Product(Base):
 
     # Relationships
     shop = relationship("Shop", back_populates="products")
+    ratings = relationship(
+        "Rating",
+        back_populates="product",
+        cascade="all, delete-orphan",
+    )
+    reviews = relationship(
+        "Review",
+        back_populates="product",
+        cascade="all, delete-orphan",
+    )

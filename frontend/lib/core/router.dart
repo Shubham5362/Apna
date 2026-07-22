@@ -17,6 +17,7 @@ import '../views/payment_view.dart';
 import '../views/payment_success_view.dart';
 import '../views/payment_failed_view.dart';
 import '../views/payment_history_view.dart';
+import '../views/write_review_view.dart';
 
 final GoRouter routerConfig = GoRouter(
   initialLocation: '/',
@@ -119,6 +120,38 @@ final GoRouter routerConfig = GoRouter(
     GoRoute(
       path: '/payments/history',
       builder: (context, state) => const PaymentHistoryView(),
+    ),
+    GoRoute(
+      path: '/review/write',
+      builder: (context, state) {
+        final productIdStr = state.uri.queryParameters['productId'];
+        final shopIdStr = state.uri.queryParameters['shopId'];
+        final productId = productIdStr != null ? int.tryParse(productIdStr) : null;
+        final shopId = shopIdStr != null ? int.tryParse(shopIdStr) : null;
+        return WriteReviewView(productId: productId, shopId: shopId);
+      },
+    ),
+    GoRoute(
+      path: '/review/edit',
+      builder: (context, state) {
+        final reviewIdStr = state.uri.queryParameters['reviewId']!;
+        final reviewId = int.parse(reviewIdStr);
+        final productIdStr = state.uri.queryParameters['productId'];
+        final shopIdStr = state.uri.queryParameters['shopId'];
+        final productId = productIdStr != null ? int.tryParse(productIdStr) : null;
+        final shopId = shopIdStr != null ? int.tryParse(shopIdStr) : null;
+        final ratingValueStr = state.uri.queryParameters['ratingValue'] ?? '5';
+        final ratingValue = int.parse(ratingValueStr);
+        final comment = state.uri.queryParameters['comment'] ?? '';
+
+        return WriteReviewView(
+          reviewId: reviewId,
+          productId: productId,
+          shopId: shopId,
+          initialRating: ratingValue,
+          initialComment: comment,
+        );
+      },
     ),
   ],
 );

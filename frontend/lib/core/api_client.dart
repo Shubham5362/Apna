@@ -287,4 +287,69 @@ class ApiClient {
     final response = await dio.get('/api/v1/payments/history');
     return response.data as List<dynamic>;
   }
+
+  // --- Rating & Review APIs ---
+  Future<Map<String, dynamic>> createReview({
+    int? productId,
+    int? shopId,
+    required int ratingValue,
+    required String comment,
+  }) async {
+    final response = await dio.post(
+      '/api/v1/reviews',
+      data: {
+        'product_id': productId,
+        'shop_id': shopId,
+        'rating_value': ratingValue,
+        'comment': comment,
+      },
+    );
+    return response.data as Map<String, dynamic>;
+  }
+
+  Future<List<dynamic>> getReviews({
+    int? productId,
+    int? shopId,
+    int? skip,
+    int? limit,
+  }) async {
+    final Map<String, dynamic> queryParams = {};
+    if (productId != null) queryParams['product_id'] = productId;
+    if (shopId != null) queryParams['shop_id'] = shopId;
+    if (skip != null) queryParams['skip'] = skip;
+    if (limit != null) queryParams['limit'] = limit;
+
+    final response = await dio.get('/api/v1/reviews', queryParameters: queryParams);
+    return response.data as List<dynamic>;
+  }
+
+  Future<Map<String, dynamic>> updateReview(
+    int reviewId, {
+    int? ratingValue,
+    String? comment,
+  }) async {
+    final Map<String, dynamic> data = {};
+    if (ratingValue != null) data['rating_value'] = ratingValue;
+    if (comment != null) data['comment'] = comment;
+
+    final response = await dio.put('/api/v1/reviews/$reviewId', data: data);
+    return response.data as Map<String, dynamic>;
+  }
+
+  Future<Map<String, dynamic>> deleteReview(int reviewId) async {
+    final response = await dio.delete('/api/v1/reviews/$reviewId');
+    return response.data as Map<String, dynamic>;
+  }
+
+  Future<Map<String, dynamic>> getRatingSummary({
+    int? productId,
+    int? shopId,
+  }) async {
+    final Map<String, dynamic> queryParams = {};
+    if (productId != null) queryParams['product_id'] = productId;
+    if (shopId != null) queryParams['shop_id'] = shopId;
+
+    final response = await dio.get('/api/v1/reviews/summary', queryParameters: queryParams);
+    return response.data as Map<String, dynamic>;
+  }
 }
