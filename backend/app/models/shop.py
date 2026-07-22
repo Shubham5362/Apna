@@ -28,3 +28,13 @@ class Shop(Base):
         back_populates="shop",
         cascade="all, delete-orphan",
     )
+    ratings = relationship(
+        "Rating",
+        back_populates="shop",
+        cascade="all, delete-orphan",
+    )
+    reviews = relationship(
+        "Review",
+        back_populates="shop",
+        cascade="all, delete-orphan",
+    )

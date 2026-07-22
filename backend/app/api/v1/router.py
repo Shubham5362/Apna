@@ -6,6 +6,7 @@ from app.api.v1.endpoints.shop import router as shop_router
 from app.api.v1.endpoints.product import router as product_router
 from app.api.v1.endpoints.cart_order import router as cart_order_router
 from app.api.v1.endpoints.payment import router as payment_router
+from app.api.v1.endpoints.rating_review import router as rating_review_router
 
 api_router = APIRouter()
 
@@ -17,3 +18,4 @@ api_router.include_router(shop_router, prefix="/shops", tags=["Shops"])
 api_router.include_router(product_router, prefix="/products", tags=["Products"])
 api_router.include_router(cart_order_router, prefix="", tags=["Cart & Order"])
 api_router.include_router(payment_router, prefix="", tags=["Payment"])
+api_router.include_router(rating_review_router, prefix="", tags=["Rating & Review"])
