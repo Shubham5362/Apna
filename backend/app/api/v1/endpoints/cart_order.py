@@ -201,72 +201,81 @@ def create_order(
             detail="Your cart is empty. Add products to place an order.",
         )
 
-    # 1. Verify stock and calculate total price
-    total_price = 0.0
-    items_to_create = []
+    try:
+        # 1. Verify stock and calculate total price
+        total_price = 0.0
+        items_to_create = []
 
-    for item in cart_items:
-        product = db.query(Product).filter(Product.id == item.product_id).first()
-        if not product or not product.is_active:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"Product with ID {item.product_id} is no longer available.",
-            )
-        if product.stock < item.quantity:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Insufficient stock for {product.name}. Available: {product.stock}.",
-            )
+        for item in cart_items:
+            product = db.query(Product).filter(Product.id == item.product_id).first()
+            if not product or not product.is_active:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail=f"Product with ID {item.product_id} is no longer available.",
+                )
+            if product.stock < item.quantity:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=f"Insufficient stock for {product.name}. Available: {product.stock}.",
+                )
 
-        # Deduct stock
-        product.stock -= item.quantity
-        price = product.price
-        total_price += price * item.quantity
+            # Deduct stock
+            product.stock -= item.quantity
+            price = product.price
+            total_price += price * item.quantity
 
-        items_to_create.append({
-            "product_id": item.product_id,
-            "product_name": product.name,
-            "quantity": item.quantity,
-            "price": price
-        })
+            items_to_create.append({
+                "product_id": item.product_id,
+                "product_name": product.name,
+                "quantity": item.quantity,
+                "price": price
+            })
 
-    # 2. Create Order
-    order = Order(
-        user_id=current_user.id,
-        status="Pending",
-        total_price=total_price,
-        delivery_address=order_in.delivery_address,
-    )
-    db.add(order)
-    db.commit()
-    db.refresh(order)
-
-    # 3. Create Order Items
-    order_items_response = []
-    for item_data in items_to_create:
-        order_item = OrderItem(
-            order_id=order.id,
-            product_id=item_data["product_id"],
-            quantity=item_data["quantity"],
-            price=item_data["price"],
+        # 2. Create Order
+        order = Order(
+            user_id=current_user.id,
+            status="Pending",
+            total_price=total_price,
+            delivery_address=order_in.delivery_address,
         )
-        db.add(order_item)
+        db.add(order)
+        db.flush()
+
+        # 3. Create Order Items
+        order_items_response = []
+        for item_data in items_to_create:
+            order_item = OrderItem(
+                order_id=order.id,
+                product_id=item_data["product_id"],
+                quantity=item_data["quantity"],
+                price=item_data["price"],
+            )
+            db.add(order_item)
+            db.flush()
+
+            order_items_response.append(
+                OrderItemResponse(
+                    id=order_item.id,
+                    product_id=order_item.product_id,
+                    product_name=item_data["product_name"],
+                    quantity=order_item.quantity,
+                    price=order_item.price,
+                )
+            )
+
+        # 4. Clear the user's cart
+        db.query(CartItem).filter(CartItem.user_id == current_user.id).delete()
+
         db.commit()
-        db.refresh(order_item)
-
-        order_items_response.append(
-            OrderItemResponse(
-                id=order_item.id,
-                product_id=order_item.product_id,
-                product_name=item_data["product_name"],
-                quantity=order_item.quantity,
-                price=order_item.price,
-            )
+        db.refresh(order)
+    except Exception as e:
+        db.rollback()
+        if isinstance(e, HTTPException):
+            raise e
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to place order: {str(e)}",
         )
-
-    # 4. Clear the user's cart
-    db.query(CartItem).filter(CartItem.user_id == current_user.id).delete()
-    db.commit()
 
     return OrderResponse(
         id=order.id,
