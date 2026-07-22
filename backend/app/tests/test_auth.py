@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 
 from app.main import app
 from app.core.deps import get_db
+from app.core.security import get_password_hash
 from app.models.user import User
 from app.models.otp import OTPVerification
 
@@ -228,3 +229,123 @@ def test_me_protected_endpoint(db: Session = next(get_db())):
         headers={"Authorization": f"Bearer {access_token}"},
     )
     assert response.status_code == 401
+
+
+def test_password_auth_lifecycle(db: Session = next(get_db())):
+    # 1. Signup Init
+    response = client.post(
+        "/api/v1/auth/signup-init",
+        json={"phone_number": "+919999999991"},
+    )
+    assert response.status_code == 200
+    assert response.json()["success"] is True
+
+    # Get latest OTP verification record
+    otp_entry = (
+        db.query(OTPVerification)
+        .filter(OTPVerification.phone_number == "+919999999991")
+        .order_by(OTPVerification.created_at.desc())
+        .first()
+    )
+    assert otp_entry is not None
+
+    # 2. Signup Complete
+    response = client.post(
+        "/api/v1/auth/signup-complete",
+        json={
+            "phone_number": "+919999999991",
+            "full_name": "Premium User",
+            "password": "secretpassword",
+            "otp": otp_entry.otp,
+        },
+    )
+    assert response.status_code == 201
+    tokens = response.json()
+    assert "access_token" in tokens
+    assert "refresh_token" in tokens
+
+    # 3. Password Login Success
+    response = client.post(
+        "/api/v1/auth/login-password",
+        json={
+            "phone_number": "+919999999991",
+            "password": "secretpassword",
+        },
+    )
+    assert response.status_code == 200
+    assert "access_token" in response.json()
+
+    # 4. Password Login Failure
+    response = client.post(
+        "/api/v1/auth/login-password",
+        json={
+            "phone_number": "+919999999991",
+            "password": "wrongpassword",
+        },
+    )
+    assert response.status_code == 400
+    assert "Incorrect password" in response.json()["error"]["message"]
+
+
+def test_forgot_password_and_reset_flow(db: Session = next(get_db())):
+    # Clear any leftover records first to avoid UniqueViolation
+    db.query(OTPVerification).filter(OTPVerification.phone_number == "+919999999991").delete()
+    db.query(User).filter(User.phone_number == "+919999999991").delete()
+    db.commit()
+
+    # Create the user first inside this test so they exist
+    user = User(
+        phone_number="+919999999991",
+        full_name="Premium User",
+        password_hash=get_password_hash("oldpassword"),
+        is_active=True,
+    )
+    db.add(user)
+    db.commit()
+
+    # 1. Forgot password request
+    response = client.post(
+        "/api/v1/auth/forgot-password",
+        json={"phone_number": "+919999999991"},
+    )
+    assert response.status_code == 200
+    assert response.json()["success"] is True
+
+    otp_entry = (
+        db.query(OTPVerification)
+        .filter(OTPVerification.phone_number == "+919999999991")
+        .order_by(OTPVerification.created_at.desc())
+        .first()
+    )
+    assert otp_entry is not None
+
+    # 2. Verify OTP
+    response = client.post(
+        "/api/v1/auth/forgot-password/verify",
+        json={"phone_number": "+919999999991", "otp": otp_entry.otp},
+    )
+    assert response.status_code == 200
+    assert response.json()["success"] is True
+
+    # 3. Reset password
+    response = client.post(
+        "/api/v1/auth/reset-password",
+        json={
+            "phone_number": "+919999999991",
+            "otp": otp_entry.otp,
+            "new_password": "newsecurepassword",
+        },
+    )
+    assert response.status_code == 200
+    assert response.json()["success"] is True
+
+    # 4. Login with new password
+    response = client.post(
+        "/api/v1/auth/login-password",
+        json={
+            "phone_number": "+919999999991",
+            "password": "newsecurepassword",
+        },
+    )
+    assert response.status_code == 200
+    assert "access_token" in response.json()

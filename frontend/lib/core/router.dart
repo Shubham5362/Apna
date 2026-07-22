@@ -19,6 +19,8 @@ import '../views/payment_failed_view.dart';
 import '../views/payment_history_view.dart';
 import '../views/write_review_view.dart';
 import '../views/login_view.dart';
+import '../views/signup_view.dart';
+import '../views/forgot_password_view.dart';
 
 final GoRouter routerConfig = GoRouter(
   initialLocation: '/',
@@ -28,6 +30,11 @@ final GoRouter routerConfig = GoRouter(
       builder: (context, state) => const HealthDashboardView(),
     ),
     GoRoute(path: '/login', builder: (context, state) => const LoginView()),
+    GoRoute(path: '/signup', builder: (context, state) => const SignupView()),
+    GoRoute(
+      path: '/forgot-password',
+      builder: (context, state) => const ForgotPasswordView(),
+    ),
     GoRoute(
       path: '/profile',
       builder: (context, state) => const UserProfileView(),

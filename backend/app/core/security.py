@@ -2,11 +2,27 @@ import secrets
 from datetime import datetime, timedelta, timezone
 from typing import Optional, Union
 import jwt
+from passlib.context import CryptContext
 from app.core.config import settings
 
-# In-memory or Redis-based blacklist. We'll use a local helper or Redis client.
-# We'll write to Redis if available, or fallback to an in-memory set in tests.
-from app.core.redis_client import redis_client
+# Password hashing configuration - using highly compatible and secure pbkdf2_sha256
+pwd_context = CryptContext(schemes=["pbkdf2_sha256"], deprecated="auto")
+
+
+def get_password_hash(password: str) -> str:
+    """
+    Generate a secure bcrypt hash of a plain text password.
+    """
+    return pwd_context.hash(password)
+
+
+def verify_password(plain_password: str, hashed_password: str) -> bool:
+    """
+    Verify a plain text password against a stored bcrypt hash.
+    """
+    if not hashed_password:
+        return False
+    return pwd_context.verify(plain_password, hashed_password)
 
 
 def generate_otp() -> str:
@@ -14,6 +30,13 @@ def generate_otp() -> str:
     Generate a cryptographically secure 6-digit numeric OTP.
     """
     return "".join(secrets.choice("0123456789") for _ in range(6))
+
+
+# In-memory or Redis-based blacklist. We'll use a local helper or Redis client.
+# We'll write to Redis if available, or fallback to an in-memory set in tests.
+from app.core.redis_client import redis_client
+
+
 
 
 def create_access_token(

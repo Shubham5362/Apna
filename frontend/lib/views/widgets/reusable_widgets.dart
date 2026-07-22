@@ -1,6 +1,7 @@
 // ignore_for_file: deprecated_member_use
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../../core/theme.dart';
 
 // 1. PRIMARY BUTTON
@@ -232,6 +233,8 @@ class AppTextField extends StatelessWidget {
   final String? Function(String?)? validator;
   final ValueChanged<String>? onChanged;
   final FocusNode? focusNode;
+  final String? prefixText;
+  final List<TextInputFormatter>? inputFormatters;
 
   const AppTextField({
     super.key,
@@ -245,6 +248,8 @@ class AppTextField extends StatelessWidget {
     this.validator,
     this.onChanged,
     this.focusNode,
+    this.prefixText,
+    this.inputFormatters,
   });
 
   @override
@@ -257,6 +262,7 @@ class AppTextField extends StatelessWidget {
       validator: validator,
       onChanged: onChanged,
       focusNode: focusNode,
+      inputFormatters: inputFormatters,
       style: theme.textTheme.bodyLarge?.copyWith(
         color: theme.colorScheme.onSurface,
       ),
@@ -264,6 +270,11 @@ class AppTextField extends StatelessWidget {
         labelText: labelText,
         hintText: hintText,
         prefixIcon: prefixIcon != null ? Icon(prefixIcon, size: 22) : null,
+        prefixText: prefixText,
+        prefixStyle: TextStyle(
+          color: theme.colorScheme.primary,
+          fontWeight: FontWeight.bold,
+        ),
         suffixIcon: suffixIcon,
         labelStyle: TextStyle(
           color: theme.colorScheme.onSurface.withOpacity(0.6),

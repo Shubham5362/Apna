@@ -21,6 +21,80 @@ class UserRegistration(BaseModel):
         return cleaned
 
 
+class UserSignup(BaseModel):
+    phone_number: str = Field(..., description="Mobile number starting with + or containing 10-15 digits")
+    full_name: str = Field(..., description="Full name of the user")
+    password: str = Field(..., min_length=6, description="Password must be at least 6 characters")
+    otp: str = Field(..., min_length=6, max_length=6, description="6-digit OTP code")
+
+    @field_validator("phone_number")
+    @classmethod
+    def validate_phone(cls, v: str) -> str:
+        cleaned = re.sub(r"[\s\-]", "", v)
+        pattern = r"^\+?[1-9]\d{9,14}$"
+        if not re.match(pattern, cleaned):
+            raise ValueError(
+                "Invalid phone number format. It must optionally start with '+' followed by 10 to 15 digits."
+            )
+        return cleaned
+
+
+class UserPasswordLogin(BaseModel):
+    phone_number: str = Field(..., description="Mobile number")
+    password: str = Field(..., description="Password")
+
+    @field_validator("phone_number")
+    @classmethod
+    def validate_phone(cls, v: str) -> str:
+        cleaned = re.sub(r"[\s\-]", "", v)
+        pattern = r"^\+?[1-9]\d{9,14}$"
+        if not re.match(pattern, cleaned):
+            raise ValueError("Invalid phone number format.")
+        return cleaned
+
+
+class ForgotPasswordRequest(BaseModel):
+    phone_number: str = Field(..., description="Mobile number")
+
+    @field_validator("phone_number")
+    @classmethod
+    def validate_phone(cls, v: str) -> str:
+        cleaned = re.sub(r"[\s\-]", "", v)
+        pattern = r"^\+?[1-9]\d{9,14}$"
+        if not re.match(pattern, cleaned):
+            raise ValueError("Invalid phone number format.")
+        return cleaned
+
+
+class ForgotPasswordVerify(BaseModel):
+    phone_number: str = Field(...)
+    otp: str = Field(..., min_length=6, max_length=6)
+
+    @field_validator("phone_number")
+    @classmethod
+    def validate_phone(cls, v: str) -> str:
+        cleaned = re.sub(r"[\s\-]", "", v)
+        pattern = r"^\+?[1-9]\d{9,14}$"
+        if not re.match(pattern, cleaned):
+            raise ValueError("Invalid phone number format.")
+        return cleaned
+
+
+class ResetPasswordRequest(BaseModel):
+    phone_number: str = Field(...)
+    otp: str = Field(..., min_length=6, max_length=6)
+    new_password: str = Field(..., min_length=6)
+
+    @field_validator("phone_number")
+    @classmethod
+    def validate_phone(cls, v: str) -> str:
+        cleaned = re.sub(r"[\s\-]", "", v)
+        pattern = r"^\+?[1-9]\d{9,14}$"
+        if not re.match(pattern, cleaned):
+            raise ValueError("Invalid phone number format.")
+        return cleaned
+
+
 class UserLoginInit(BaseModel):
     phone_number: str = Field(..., description="Mobile number to send OTP to")
 
