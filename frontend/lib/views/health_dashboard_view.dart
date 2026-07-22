@@ -95,6 +95,17 @@ class HealthDashboardView extends ConsumerWidget {
                 alignment: WrapAlignment.center,
                 children: [
                   ElevatedButton.icon(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.deepOrange,
+                      foregroundColor: Colors.white,
+                    ),
+                    onPressed: () {
+                      context.go('/login');
+                    },
+                    icon: const Icon(Icons.lock_person_rounded),
+                    label: const Text('🔐 Premium Login (Apna Mandla)'),
+                  ),
+                  ElevatedButton.icon(
                     onPressed: () => ref.refresh(healthCheckProvider),
                     icon: const Icon(Icons.refresh),
                     label: const Text('Refresh Status'),
