@@ -7,6 +7,9 @@ from fastapi.staticfiles import StaticFiles
 from sqlalchemy.orm import Session
 import redis
 
+from alembic.config import Config
+from alembic import command
+
 from app.core.config import settings
 from app.core.logging import setup_logging
 from app.core.exceptions import register_exception_handlers
@@ -32,9 +35,33 @@ def log_all_routes(router, prefix=''):
             methods = list(getattr(route, 'methods', []))
             logger.info(f"Registered Route: {path} - Methods: {methods}")
 
+
+# Resolve alembic.ini path relative to main.py
+app_dir = os.path.dirname(os.path.abspath(__file__))
+backend_root = os.path.dirname(app_dir)
+alembic_ini_path = os.path.join(backend_root, "alembic.ini")
+
+
+def run_db_migrations():
+    """
+    Programmatically run database migrations using Alembic on application startup.
+    This ensures that Render deployments never suffer from missing tables/schemas.
+    """
+    try:
+        logger.info(f"Checking and running database migrations using {alembic_ini_path}...")
+        alembic_cfg = Config(alembic_ini_path)
+        command.upgrade(alembic_cfg, "head")
+        logger.info("Database migrations executed successfully.")
+    except Exception as e:
+        logger.error(f"Failed to run database migrations on startup: {str(e)}")
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Log all registered routes on startup
+    # 1. Execute DB migrations programmatically
+    run_db_migrations()
+
+    # 2. Log all registered routes on startup
     logger.info("Initializing application and logging registered routes...")
     try:
         log_all_routes(app)
