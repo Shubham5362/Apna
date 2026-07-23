@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/providers.dart';
+import '../../core/theme.dart';
 import '../widgets/rating_widgets.dart';
+import '../widgets/reusable_widgets.dart';
 
 class ShopDetailsView extends ConsumerWidget {
   final int shopId;
@@ -17,19 +19,16 @@ class ShopDetailsView extends ConsumerWidget {
 
     if (context.mounted) {
       if (success) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Shop photo updated successfully!'),
-            backgroundColor: Colors.green,
-          ),
+        AppSnackbar.show(
+          context,
+          message: 'दुकान की तस्वीर सफलतापूर्वक बदली गई!',
         );
       } else {
         final error = ref.read(shopOpsProvider).error;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Failed to update photo: $error'),
-            backgroundColor: Colors.red,
-          ),
+        AppSnackbar.show(
+          context,
+          message: 'फोटो अपलोड करने में विफल: $error',
+          isError: true,
         );
       }
     }
@@ -39,19 +38,19 @@ class ShopDetailsView extends ConsumerWidget {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Delete Shop'),
+        title: const Text('दुकान हटाएं (Delete Shop)'),
         content: const Text(
-          'Are you sure you want to delete this shop? This action cannot be undone.',
+          'क्या आप निश्चित रूप से इस दुकान को हटाना चाहते हैं? यह क्रिया पूर्ववत नहीं की जा सकती।',
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancel'),
+            child: const Text('रद्द करें (Cancel)'),
           ),
           TextButton(
-            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            style: TextButton.styleFrom(foregroundColor: AppColors.error),
             onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('Delete'),
+            child: const Text('हटाएं (Delete)'),
           ),
         ],
       ),
@@ -62,20 +61,14 @@ class ShopDetailsView extends ConsumerWidget {
           .read(shopOpsProvider.notifier)
           .deleteShop(shopId);
       if (success && context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Shop deleted successfully.'),
-            backgroundColor: Colors.green,
-          ),
-        );
+        AppSnackbar.show(context, message: 'दुकान सफलतापूर्वक हटा दी गई।');
         context.go('/shops');
       } else if (context.mounted) {
         final error = ref.read(shopOpsProvider).error;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Delete failed: $error'),
-            backgroundColor: Colors.red,
-          ),
+        AppSnackbar.show(
+          context,
+          message: 'हटाने में विफलता: $error',
+          isError: true,
         );
       }
     }
@@ -83,6 +76,8 @@ class ShopDetailsView extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+
     final shopAsync = ref.watch(shopDetailsProvider(shopId));
     final profileState = ref.watch(userProfileProvider);
     final baseUrl = ref.watch(apiClientProvider).dio.options.baseUrl;
@@ -90,8 +85,9 @@ class ShopDetailsView extends ConsumerWidget {
     final currentUserId = profileState.profile?['user_id'];
 
     return Scaffold(
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        title: const Text('Shop Details'),
+        title: const Text('दुकान का विवरण (Shop Details)'),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => context.go('/shops'),
@@ -100,56 +96,60 @@ class ShopDetailsView extends ConsumerWidget {
       body: shopAsync.when(
         data: (shop) {
           final name = shop['name'] as String;
-          final desc = shop['description'] ?? 'No description available.';
+          final desc = shop['description'] ?? 'कोई विवरण उपलब्ध नहीं है।';
           final imageUrl = shop['image_url'];
           final fullImageUrl = imageUrl != null ? '$baseUrl$imageUrl' : null;
           final ownerId = shop['owner_id'] as int;
           final isActive = shop['is_active'] as bool;
           final isOwner =
-              currentUserId == ownerId ||
-              profileState.profile == null; // Always allow edits if demoing
+              currentUserId == ownerId || profileState.profile == null;
 
           return SingleChildScrollView(
+            physics: const BouncingScrollPhysics(),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Shop Photo Header
+                // Shop Photo cover
                 Stack(
                   alignment: Alignment.bottomRight,
                   children: [
                     Container(
-                      height: 250,
+                      height: 220,
                       width: double.infinity,
-                      color: Colors.blue.shade50,
+                      color: theme.colorScheme.primaryContainer.withOpacity(
+                        0.2,
+                      ),
                       child: fullImageUrl != null
                           ? Image.network(
                               fullImageUrl,
                               fit: BoxFit.cover,
                               errorBuilder: (context, error, stackTrace) =>
-                                  const Icon(
-                                    Icons.store,
+                                  Icon(
+                                    Icons.store_rounded,
                                     size: 80,
-                                    color: Colors.blue,
+                                    color: theme.colorScheme.primary,
                                   ),
                             )
-                          : const Icon(
-                              Icons.store,
+                          : Icon(
+                              Icons.store_rounded,
                               size: 80,
-                              color: Colors.blue,
+                              color: theme.colorScheme.primary,
                             ),
                     ),
                     if (isOwner)
                       Padding(
-                        padding: const EdgeInsets.all(16.0),
+                        padding: const EdgeInsets.all(AppSpacing.m),
                         child: FloatingActionButton.small(
                           onPressed: () => _uploadMockPhoto(context, ref),
-                          child: const Icon(Icons.camera_alt),
+                          backgroundColor: theme.colorScheme.primary,
+                          foregroundColor: theme.colorScheme.onPrimary,
+                          child: const Icon(Icons.camera_alt_rounded),
                         ),
                       ),
                   ],
                 ),
                 Padding(
-                  padding: const EdgeInsets.all(16.0),
+                  padding: const EdgeInsets.all(AppSpacing.l),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -159,88 +159,100 @@ class ShopDetailsView extends ConsumerWidget {
                           Expanded(
                             child: Text(
                               name,
-                              style: Theme.of(context).textTheme.headlineMedium
-                                  ?.copyWith(fontWeight: FontWeight.bold),
+                              style: theme.textTheme.headlineSmall?.copyWith(
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                           ),
-                          Chip(
-                            label: Text(isActive ? 'ACTIVE' : 'INACTIVE'),
-                            backgroundColor: isActive
-                                ? Colors.green.shade100
-                                : Colors.grey.shade200,
-                            labelStyle: TextStyle(
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 4,
+                            ),
+                            decoration: BoxDecoration(
                               color: isActive
-                                  ? Colors.green.shade800
-                                  : Colors.grey.shade800,
-                              fontWeight: FontWeight.bold,
+                                  ? Colors.green.withOpacity(0.1)
+                                  : Colors.grey.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(
+                                AppBorderRadius.s,
+                              ),
+                            ),
+                            child: Text(
+                              isActive
+                                  ? 'सक्रिय (ACTIVE)'
+                                  : 'निष्क्रिय (INACTIVE)',
+                              style: TextStyle(
+                                color: isActive ? Colors.green : Colors.grey,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 12,
+                              ),
                             ),
                           ),
                         ],
                       ),
-                      const SizedBox(height: 16),
-                      Text(desc, style: Theme.of(context).textTheme.bodyLarge),
+                      const SizedBox(height: AppSpacing.m),
+                      Text(
+                        desc,
+                        style: theme.textTheme.bodyLarge?.copyWith(
+                          color: theme.colorScheme.onSurface.withOpacity(0.8),
+                        ),
+                      ),
                       const Divider(height: 40),
+
                       if (isOwner) ...[
                         Row(
                           children: [
                             Expanded(
-                              child: ElevatedButton.icon(
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.blue,
-                                  foregroundColor: Colors.white,
-                                  padding: const EdgeInsets.symmetric(
-                                    vertical: 12,
-                                  ),
-                                ),
+                              child: PrimaryButton(
+                                text: 'दुकान संपादित करें (Edit)',
+                                icon: Icons.edit_rounded,
                                 onPressed: () =>
                                     context.go('/shops/$shopId/edit'),
-                                icon: const Icon(Icons.edit),
-                                label: const Text('Edit Shop'),
                               ),
                             ),
-                            const SizedBox(width: 16),
+                            const SizedBox(width: AppSpacing.m),
                             Expanded(
-                              child: OutlinedButton.icon(
-                                style: OutlinedButton.styleFrom(
-                                  foregroundColor: Colors.red,
-                                  side: const BorderSide(color: Colors.red),
-                                  padding: const EdgeInsets.symmetric(
-                                    vertical: 12,
-                                  ),
-                                ),
+                              child: OutlineButton(
+                                text: 'दुकान हटाएं (Delete)',
+                                icon: Icons.delete_outline_rounded,
                                 onPressed: () => _deleteShop(context, ref),
-                                icon: const Icon(Icons.delete),
-                                label: const Text('Delete Shop'),
                               ),
                             ),
                           ],
                         ),
+                        const Divider(height: 40),
                       ],
-                      const Divider(height: 40),
-                      // Ratings & Reviews Header
+
+                      // Ratings Section
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            'Ratings & Reviews',
-                            style: Theme.of(context).textTheme.titleLarge
-                                ?.copyWith(fontWeight: FontWeight.bold),
-                          ),
-                          ElevatedButton.icon(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.blue,
-                              foregroundColor: Colors.white,
+                            'रेटिंग और समीक्षाएं (Reviews)',
+                            style: theme.textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
                             ),
+                          ),
+                          TextButton.icon(
                             onPressed: () =>
                                 context.go('/review/write?shopId=$shopId'),
-                            icon: const Icon(Icons.rate_review),
-                            label: const Text('Write Review'),
+                            icon: Icon(
+                              Icons.rate_review_rounded,
+                              size: 18,
+                              color: theme.colorScheme.primary,
+                            ),
+                            label: Text(
+                              'समीक्षा लिखें',
+                              style: TextStyle(
+                                color: theme.colorScheme.primary,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
                           ),
                         ],
                       ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: AppSpacing.m),
 
-                      // Rating Summary Card
                       ref
                           .watch(shopRatingSummaryProvider(shopId))
                           .when(
@@ -270,9 +282,8 @@ class ShopDetailsView extends ConsumerWidget {
                             ),
                           ),
 
-                      const SizedBox(height: 24),
+                      const SizedBox(height: AppSpacing.l),
 
-                      // Reviews List
                       ref
                           .watch(shopReviewsProvider(shopId))
                           .when(
@@ -281,10 +292,10 @@ class ShopDetailsView extends ConsumerWidget {
                                 return const Center(
                                   child: Padding(
                                     padding: EdgeInsets.symmetric(
-                                      vertical: 24.0,
+                                      vertical: AppSpacing.xl,
                                     ),
                                     child: Text(
-                                      'No reviews yet. Be the first to review!',
+                                      'अभी तक कोई समीक्षा नहीं है। पहली समीक्षा लिखें!',
                                       style: TextStyle(color: Colors.grey),
                                     ),
                                   ),
@@ -310,9 +321,18 @@ class ShopDetailsView extends ConsumerWidget {
                                       currentUserId == reviewUserId;
 
                                   return Card(
-                                    margin: const EdgeInsets.only(bottom: 12),
+                                    margin: const EdgeInsets.only(
+                                      bottom: AppSpacing.m,
+                                    ),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(
+                                        AppBorderRadius.m,
+                                      ),
+                                    ),
                                     child: Padding(
-                                      padding: const EdgeInsets.all(12.0),
+                                      padding: const EdgeInsets.all(
+                                        AppSpacing.m,
+                                      ),
                                       child: Column(
                                         crossAxisAlignment:
                                             CrossAxisAlignment.start,
@@ -329,12 +349,15 @@ class ShopDetailsView extends ConsumerWidget {
                                               ),
                                               StarRatingWidget(
                                                 rating: ratingVal.toDouble(),
-                                                size: 16,
+                                                size: 14,
                                               ),
                                             ],
                                           ),
-                                          const SizedBox(height: 8),
-                                          Text(comment),
+                                          const SizedBox(height: AppSpacing.s),
+                                          Text(
+                                            comment,
+                                            style: theme.textTheme.bodyMedium,
+                                          ),
                                           if (isMyReview) ...[
                                             const Divider(height: 16),
                                             Row(
@@ -342,23 +365,22 @@ class ShopDetailsView extends ConsumerWidget {
                                                   MainAxisAlignment.end,
                                               children: [
                                                 TextButton.icon(
-                                                  style: TextButton.styleFrom(
-                                                    foregroundColor:
-                                                        Colors.orange,
-                                                  ),
                                                   onPressed: () => context.go(
                                                     '/review/edit?reviewId=$reviewId&shopId=$shopId&ratingValue=$ratingVal&comment=${Uri.encodeComponent(comment)}',
                                                   ),
                                                   icon: const Icon(
-                                                    Icons.edit,
-                                                    size: 16,
+                                                    Icons.edit_rounded,
+                                                    size: 14,
+                                                    color: Colors.orange,
                                                   ),
-                                                  label: const Text('Edit'),
+                                                  label: const Text(
+                                                    'संपादित करें',
+                                                    style: TextStyle(
+                                                      color: Colors.orange,
+                                                    ),
+                                                  ),
                                                 ),
                                                 TextButton.icon(
-                                                  style: TextButton.styleFrom(
-                                                    foregroundColor: Colors.red,
-                                                  ),
                                                   onPressed: () async {
                                                     await ref
                                                         .read(
@@ -371,10 +393,17 @@ class ShopDetailsView extends ConsumerWidget {
                                                         );
                                                   },
                                                   icon: const Icon(
-                                                    Icons.delete,
-                                                    size: 16,
+                                                    Icons
+                                                        .delete_outline_rounded,
+                                                    size: 14,
+                                                    color: AppColors.error,
                                                   ),
-                                                  label: const Text('Delete'),
+                                                  label: const Text(
+                                                    'हटाएं',
+                                                    style: TextStyle(
+                                                      color: AppColors.error,
+                                                    ),
+                                                  ),
                                                 ),
                                               ],
                                             ),
@@ -398,11 +427,9 @@ class ShopDetailsView extends ConsumerWidget {
             ),
           );
         },
-        error: (err, stack) => Center(
-          child: Text(
-            'Error loading shop: $err',
-            style: const TextStyle(color: Colors.red),
-          ),
+        error: (err, stack) => ErrorStateWidget(
+          message: err.toString(),
+          onRetry: () => ref.refresh(shopDetailsProvider(shopId)),
         ),
         loading: () => const Center(child: CircularProgressIndicator()),
       ),

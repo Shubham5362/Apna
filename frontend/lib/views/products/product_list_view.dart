@@ -2,12 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/providers.dart';
+import '../../core/theme.dart';
+import '../widgets/reusable_widgets.dart';
 
 class ProductListView extends ConsumerWidget {
   const ProductListView({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     final productsAsync = ref.watch(productsListProvider);
     final shopsAsync = ref.watch(shopsListProvider);
     final selectedCategory = ref.watch(productSelectedCategoryProvider);
@@ -18,99 +23,105 @@ class ProductListView extends ConsumerWidget {
 
     final categories = [
       'All',
-      'Fruits',
       'Vegetables',
-      'Bakery',
+      'Fruits',
       'Dairy',
-      'Grains',
+      'Grocery',
+      'Bakery',
     ];
 
     return Scaffold(
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        title: const Text('Marketplace Products'),
+        title: const Text('मांडला उत्पाद (Marketplace Products)'),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => context.go('/'),
+        ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.refresh),
+            icon: const Icon(Icons.refresh_rounded),
             onPressed: () {
               ref.invalidate(productsListProvider);
             },
-          ),
-          IconButton(
-            icon: const Icon(Icons.person),
-            onPressed: () => context.go('/profile'),
           ),
         ],
       ),
       body: Column(
         children: [
-          // Search and Sort Controls
+          // Search & Sort bar
           Padding(
             padding: const EdgeInsets.symmetric(
-              horizontal: 16.0,
-              vertical: 8.0,
+              horizontal: AppSpacing.l,
+              vertical: AppSpacing.s,
             ),
             child: Row(
               children: [
                 Expanded(
-                  child: TextField(
-                    decoration: InputDecoration(
-                      hintText: 'Search products...',
-                      prefixIcon: const Icon(Icons.search),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8.0),
-                      ),
-                      contentPadding: const EdgeInsets.symmetric(vertical: 0),
-                    ),
+                  child: AppSearchBar(
+                    hintText: 'उत्पाद खोजें (Search products...)',
                     onChanged: (value) {
                       ref.read(productSearchQueryProvider.notifier).state =
                           value;
                     },
                   ),
                 ),
-                const SizedBox(width: 12),
-                DropdownButton<String>(
-                  value: sortBy,
-                  onChanged: (value) {
-                    if (value != null) {
-                      ref.read(productSortByProvider.notifier).state = value;
-                    }
-                  },
-                  items: const [
-                    DropdownMenuItem(value: 'newest', child: Text('Newest')),
-                    DropdownMenuItem(value: 'oldest', child: Text('Oldest')),
-                    DropdownMenuItem(
-                      value: 'price low-high',
-                      child: Text('Price: Low-High'),
+                const SizedBox(width: AppSpacing.m),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: AppSpacing.s),
+                  decoration: BoxDecoration(
+                    color: isDark
+                        ? Colors.black.withOpacity(0.2)
+                        : Colors.white,
+                    borderRadius: BorderRadius.circular(AppBorderRadius.m),
+                    border: Border.all(
+                      color: theme.dividerColor.withOpacity(0.1),
                     ),
-                    DropdownMenuItem(
-                      value: 'price high-low',
-                      child: Text('Price: High-Low'),
-                    ),
-                  ],
+                  ),
+                  child: DropdownButton<String>(
+                    value: sortBy,
+                    underline: const SizedBox(),
+                    onChanged: (value) {
+                      if (value != null) {
+                        ref.read(productSortByProvider.notifier).state = value;
+                      }
+                    },
+                    items: const [
+                      DropdownMenuItem(value: 'newest', child: Text('Newest')),
+                      DropdownMenuItem(value: 'oldest', child: Text('Oldest')),
+                      DropdownMenuItem(
+                        value: 'price low-high',
+                        child: Text('Price: Low-High'),
+                      ),
+                      DropdownMenuItem(
+                        value: 'price high-low',
+                        child: Text('Price: High-Low'),
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),
           ),
 
-          // Filters row: Category and Shop
+          // Filters Row: Categories & Shop
           Padding(
             padding: const EdgeInsets.symmetric(
-              horizontal: 16.0,
-              vertical: 4.0,
+              horizontal: AppSpacing.l,
+              vertical: AppSpacing.xs,
             ),
             child: Row(
               children: [
-                // Category Filter
+                // Category Selector
                 Expanded(
                   child: DropdownButtonFormField<String?>(
-                    initialValue: selectedCategory,
+                    value: selectedCategory,
                     decoration: const InputDecoration(
-                      labelText: 'Category',
+                      labelText: 'श्रेणी (Category)',
                       contentPadding: EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 4,
+                        horizontal: AppSpacing.m,
+                        vertical: AppSpacing.s,
                       ),
-                      border: OutlineInputBorder(),
                     ),
                     onChanged: (value) {
                       ref.read(productSelectedCategoryProvider.notifier).state =
@@ -124,20 +135,20 @@ class ProductListView extends ConsumerWidget {
                         .toList(),
                   ),
                 ),
-                const SizedBox(width: 12),
-                // Shop Filter
+                const SizedBox(width: AppSpacing.m),
+
+                // Shop Selector
                 Expanded(
                   child: shopsAsync.when(
                     data: (shops) {
                       return DropdownButtonFormField<int?>(
-                        initialValue: selectedShopId,
+                        value: selectedShopId,
                         decoration: const InputDecoration(
-                          labelText: 'Shop',
+                          labelText: 'दुकान (Shop)',
                           contentPadding: EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 4,
+                            horizontal: AppSpacing.m,
+                            vertical: AppSpacing.s,
                           ),
-                          border: OutlineInputBorder(),
                         ),
                         onChanged: (value) {
                           ref
@@ -170,7 +181,7 @@ class ProductListView extends ConsumerWidget {
               ],
             ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: AppSpacing.m),
 
           // Product List Grid
           Expanded(
@@ -178,37 +189,23 @@ class ProductListView extends ConsumerWidget {
               data: (products) {
                 if (products.isEmpty) {
                   return Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Icon(
-                          Icons.shopping_bag_outlined,
-                          size: 64,
-                          color: Colors.grey,
-                        ),
-                        const SizedBox(height: 16),
-                        const Text(
-                          'No products found.',
-                          style: TextStyle(fontSize: 18, color: Colors.grey),
-                        ),
-                        const SizedBox(height: 16),
-                        ElevatedButton.icon(
-                          onPressed: () => context.go('/products/create'),
-                          icon: const Icon(Icons.add),
-                          label: const Text('Add Your First Product'),
-                        ),
-                      ],
+                    child: EmptyStateWidget(
+                      title: 'कोई उत्पाद नहीं मिला!',
+                      description: 'खोज शब्द बदलें या अपना उत्पाद जोड़ें।',
+                      icon: Icons.shopping_bag_outlined,
+                      actionText: 'नया उत्पाद जोड़ें',
+                      onActionPressed: () => context.go('/products/create'),
                     ),
                   );
                 }
 
                 return GridView.builder(
-                  padding: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.all(AppSpacing.l),
                   gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 2,
-                    childAspectRatio: 0.70,
-                    crossAxisSpacing: 16,
-                    mainAxisSpacing: 16,
+                    childAspectRatio: 0.72,
+                    crossAxisSpacing: AppSpacing.m,
+                    mainAxisSpacing: AppSpacing.m,
                   ),
                   itemCount: products.length,
                   itemBuilder: (context, index) {
@@ -216,9 +213,6 @@ class ProductListView extends ConsumerWidget {
                     final id = product['id'] as int;
                     final name = product['name'] as String;
                     final price = product['price'] as double;
-                    final mrp = product['mrp'] as double?;
-                    final brand = product['brand'] as String?;
-                    final stock = product['stock'] as int;
                     final cat = product['category'] ?? 'General';
                     final imageUrl = product['image_url'];
                     final fullImageUrl = imageUrl != null
@@ -226,11 +220,12 @@ class ProductListView extends ConsumerWidget {
                         : null;
 
                     return Card(
-                      elevation: 4,
-                      clipBehavior: Clip.antiAlias,
+                      elevation: 2,
+                      shadowColor: Colors.black.withOpacity(0.04),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(AppBorderRadius.m),
                       ),
+                      clipBehavior: Clip.antiAlias,
                       child: InkWell(
                         onTap: () => context.go('/products/$id'),
                         child: Column(
@@ -239,83 +234,60 @@ class ProductListView extends ConsumerWidget {
                             Expanded(
                               child: Container(
                                 width: double.infinity,
-                                color: Colors.orange.shade50,
+                                color: theme.colorScheme.primaryContainer
+                                    .withOpacity(0.2),
                                 child: fullImageUrl != null
                                     ? Image.network(
                                         fullImageUrl,
                                         fit: BoxFit.cover,
                                         errorBuilder:
                                             (context, error, stackTrace) =>
-                                                const Icon(
-                                                  Icons.shopping_bag,
-                                                  size: 48,
-                                                  color: Colors.orange,
+                                                Icon(
+                                                  Icons.shopping_bag_outlined,
+                                                  size: 44,
+                                                  color:
+                                                      theme.colorScheme.primary,
                                                 ),
                                       )
-                                    : const Icon(
-                                        Icons.shopping_bag,
-                                        size: 48,
-                                        color: Colors.orange,
+                                    : Icon(
+                                        Icons.shopping_bag_outlined,
+                                        size: 44,
+                                        color: theme.colorScheme.primary,
                                       ),
                               ),
                             ),
                             Padding(
-                              padding: const EdgeInsets.all(12),
+                              padding: const EdgeInsets.all(AppSpacing.s),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
                                     name,
-                                    style: const TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                    ),
+                                    style: theme.textTheme.titleMedium
+                                        ?.copyWith(fontWeight: FontWeight.bold),
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
                                   ),
-                                  if (brand != null && brand.isNotEmpty) ...[
-                                    const SizedBox(height: 2),
-                                    Text(
-                                      brand,
-                                      style: TextStyle(
-                                        fontSize: 12,
-                                        color: Colors.grey.shade600,
-                                        fontStyle: FontStyle.italic,
-                                      ),
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    'Stock: ${product['stock'] ?? 0} units',
+                                    style: const TextStyle(
+                                      fontSize: 11,
+                                      color: AppColors.textSecondary,
                                     ),
-                                  ],
-                                  const SizedBox(height: 4),
+                                  ),
+                                  const SizedBox(height: AppSpacing.xs),
                                   Row(
                                     mainAxisAlignment:
                                         MainAxisAlignment.spaceBetween,
                                     children: [
-                                      Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            '\$$price',
-                                            style: const TextStyle(
-                                              fontSize: 14,
-                                              fontWeight: FontWeight.bold,
-                                              color: Colors.green,
-                                            ),
-                                          ),
-                                          if (mrp != null) ...[
-                                            const SizedBox(height: 1),
-                                            Text(
-                                              '\$$mrp',
-                                              style: const TextStyle(
-                                                fontSize: 11,
-                                                color: Colors.red,
-                                                decoration:
-                                                    TextDecoration.lineThrough,
-                                              ),
-                                            ),
-                                          ],
-                                        ],
+                                      Text(
+                                        '₹${price.toStringAsFixed(2)}',
+                                        style: TextStyle(
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.bold,
+                                          color: theme.colorScheme.primary,
+                                        ),
                                       ),
                                       Container(
                                         padding: const EdgeInsets.symmetric(
@@ -323,29 +295,22 @@ class ProductListView extends ConsumerWidget {
                                           vertical: 2,
                                         ),
                                         decoration: BoxDecoration(
-                                          color: Colors.orange.shade100,
+                                          color: theme.colorScheme.primary
+                                              .withOpacity(0.1),
                                           borderRadius: BorderRadius.circular(
-                                            4,
+                                            AppBorderRadius.s,
                                           ),
                                         ),
                                         child: Text(
                                           cat,
                                           style: TextStyle(
-                                            fontSize: 10,
-                                            color: Colors.orange.shade800,
+                                            fontSize: 9,
+                                            color: theme.colorScheme.primary,
                                             fontWeight: FontWeight.bold,
                                           ),
                                         ),
                                       ),
                                     ],
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    'Stock: $stock units',
-                                    style: const TextStyle(
-                                      fontSize: 11,
-                                      color: Colors.grey,
-                                    ),
                                   ),
                                 ],
                               ),
@@ -357,11 +322,9 @@ class ProductListView extends ConsumerWidget {
                   },
                 );
               },
-              error: (err, stack) => Center(
-                child: Text(
-                  'Error loading products: $err',
-                  style: const TextStyle(color: Colors.red),
-                ),
+              error: (err, stack) => ErrorStateWidget(
+                message: err.toString(),
+                onRetry: () => ref.refresh(productsListProvider),
               ),
               loading: () => const Center(child: CircularProgressIndicator()),
             ),
@@ -370,8 +333,10 @@ class ProductListView extends ConsumerWidget {
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => context.go('/products/create'),
-        icon: const Icon(Icons.add),
-        label: const Text('Add Product'),
+        backgroundColor: theme.colorScheme.primary,
+        foregroundColor: theme.colorScheme.onPrimary,
+        icon: const Icon(Icons.add_shopping_cart_rounded),
+        label: const Text('उत्पाद जोड़ें (Add Product)'),
       ),
     );
   }

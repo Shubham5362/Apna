@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/providers.dart';
+import '../../core/theme.dart';
+import '../widgets/reusable_widgets.dart';
 
 class CreateProductView extends ConsumerStatefulWidget {
   const CreateProductView({super.key});
@@ -48,13 +50,10 @@ class _CreateProductViewState extends ConsumerState<CreateProductView> {
   Future<void> _submit() async {
     if (_formKey.currentState!.validate()) {
       if (_selectedShopId == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text(
-              'Please select a shop first! If you don\'t have one, create it first.',
-            ),
-            backgroundColor: Colors.red,
-          ),
+        AppSnackbar.show(
+          context,
+          message: 'कृपया पहले एक दुकान का चयन करें!',
+          isError: true,
         );
         return;
       }
@@ -83,21 +82,19 @@ class _CreateProductViewState extends ConsumerState<CreateProductView> {
           .createProduct(data);
       if (mounted) {
         if (product != null) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Product created successfully!'),
-              backgroundColor: Colors.green,
-            ),
+          AppSnackbar.show(
+            context,
+            message:
+                'उत्पाद सफलतापूर्वक पंजीकृत किया गया! (Product listed successfully)',
           );
           final id = product['id'] as int;
           context.go('/products/$id');
         } else {
           final error = ref.read(productOpsProvider).error;
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Failed to create product: $error'),
-              backgroundColor: Colors.red,
-            ),
+          AppSnackbar.show(
+            context,
+            message: 'पंजीकरण विफल: $error',
+            isError: true,
           );
         }
       }
@@ -106,36 +103,40 @@ class _CreateProductViewState extends ConsumerState<CreateProductView> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final shopsAsync = ref.watch(shopsListProvider);
     final opsState = ref.watch(productOpsProvider);
 
     return Scaffold(
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        title: const Text('Add Product'),
+        title: const Text('नया उत्पाद जोड़ें (Add Product)'),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => context.go('/products'),
         ),
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
+        physics: const BouncingScrollPhysics(),
+        padding: const EdgeInsets.all(AppSpacing.l),
         child: Form(
           key: _formKey,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'List a new item!',
-                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                'नया सामान बेचें!',
+                style: theme.textTheme.headlineSmall?.copyWith(
                   fontWeight: FontWeight.bold,
+                  color: theme.colorScheme.primary,
                 ),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: AppSpacing.xs),
               const Text(
-                'Add details of the product to put it up for sale.',
-                style: TextStyle(color: Colors.grey),
+                'ग्राहकों को बेचने के लिए उत्पाद की पूरी जानकारी नीचे दर्ज करें।',
+                style: TextStyle(color: AppColors.textSecondary),
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: AppSpacing.xl),
 
               // Shop selection
               shopsAsync.when(
@@ -144,20 +145,21 @@ class _CreateProductViewState extends ConsumerState<CreateProductView> {
                     return Card(
                       color: Colors.red.shade50,
                       child: Padding(
-                        padding: const EdgeInsets.all(16.0),
+                        padding: const EdgeInsets.all(AppSpacing.l),
                         child: Column(
                           children: [
                             const Text(
-                              'You must create a shop first before listing products.',
+                              'उत्पाद जोड़ने से पहले आपको एक दुकान पंजीकृत करनी होगी।',
                               style: TextStyle(
                                 color: Colors.red,
                                 fontWeight: FontWeight.bold,
                               ),
+                              textAlign: TextAlign.center,
                             ),
-                            const SizedBox(height: 12),
-                            ElevatedButton(
+                            const SizedBox(height: AppSpacing.m),
+                            PrimaryButton(
+                              text: 'दुकान पंजीकृत करें',
                               onPressed: () => context.go('/shops/create'),
-                              child: const Text('Create Shop Now'),
                             ),
                           ],
                         ),
@@ -170,13 +172,10 @@ class _CreateProductViewState extends ConsumerState<CreateProductView> {
                   }
 
                   return DropdownButtonFormField<int?>(
-                    initialValue: _selectedShopId,
-                    decoration: InputDecoration(
-                      labelText: 'Select Shop',
-                      prefixIcon: const Icon(Icons.store),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
+                    value: _selectedShopId,
+                    decoration: const InputDecoration(
+                      labelText: 'दुकान चुनें (Select Shop)',
+                      prefixIcon: Icon(Icons.store),
                     ),
                     onChanged: (value) {
                       setState(() {
@@ -194,56 +193,42 @@ class _CreateProductViewState extends ConsumerState<CreateProductView> {
                 error: (err, stack) => const Text('Error loading shops'),
                 loading: () => const Center(child: CircularProgressIndicator()),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: AppSpacing.m),
 
-              TextFormField(
+              AppTextField(
                 controller: _nameController,
-                decoration: InputDecoration(
-                  labelText: 'Product Name',
-                  prefixIcon: const Icon(Icons.shopping_bag),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                ),
+                labelText: 'उत्पाद का नाम (Product Name)',
+                hintText: 'उदा. ताजी गोभी / शुद्ध सरसों का तेल',
+                prefixIcon: Icons.shopping_bag_outlined,
                 validator: (value) {
                   if (value == null || value.trim().isEmpty) {
-                    return 'Product name is required';
+                    return 'उत्पाद का नाम आवश्यक है';
                   }
                   return null;
                 },
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: AppSpacing.m),
 
               Row(
                 children: [
                   Expanded(
-                    child: TextFormField(
+                    child: AppTextField(
                       controller: _brandController,
-                      decoration: InputDecoration(
-                        labelText: 'Brand (Optional)',
-                        prefixIcon: const Icon(
-                          Icons.branding_watermark_outlined,
-                        ),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                      ),
+                      labelText: 'ब्रांड (Optional)',
+                      hintText: 'उदा. पतंजलि',
+                      prefixIcon: Icons.branding_watermark_outlined,
                     ),
                   ),
-                  const SizedBox(width: 16),
+                  const SizedBox(width: AppSpacing.m),
                   Expanded(
-                    child: TextFormField(
+                    child: AppTextField(
                       controller: _categoryController,
-                      decoration: InputDecoration(
-                        labelText: 'Category (e.g. Fruits)',
-                        prefixIcon: const Icon(Icons.category_outlined),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                      ),
+                      labelText: 'श्रेणी (Category)',
+                      hintText: 'उदा. Vegetables / Dairy',
+                      prefixIcon: Icons.category_outlined,
                       validator: (value) {
                         if (value == null || value.trim().isEmpty) {
-                          return 'Category is required';
+                          return 'श्रेणी आवश्यक है';
                         }
                         return null;
                       },
@@ -251,54 +236,46 @@ class _CreateProductViewState extends ConsumerState<CreateProductView> {
                   ),
                 ],
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: AppSpacing.m),
 
               Row(
                 children: [
                   Expanded(
-                    child: TextFormField(
+                    child: AppTextField(
                       controller: _priceController,
                       keyboardType: const TextInputType.numberWithOptions(
                         decimal: true,
                       ),
-                      decoration: InputDecoration(
-                        labelText: 'Price (\$)',
-                        prefixIcon: const Icon(Icons.attach_money),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                      ),
+                      labelText: 'कीमत (Price ₹)',
+                      hintText: '45.00',
+                      prefixIcon: Icons.currency_rupee_rounded,
                       validator: (value) {
                         if (value == null || value.trim().isEmpty) {
-                          return 'Price is required';
+                          return 'कीमत आवश्यक है';
                         }
                         if (double.tryParse(value) == null ||
                             double.parse(value) <= 0) {
-                          return 'Enter valid price';
+                          return 'वैध कीमत दर्ज करें';
                         }
                         return null;
                       },
                     ),
                   ),
-                  const SizedBox(width: 16),
+                  const SizedBox(width: AppSpacing.m),
                   Expanded(
-                    child: TextFormField(
+                    child: AppTextField(
                       controller: _mrpController,
                       keyboardType: const TextInputType.numberWithOptions(
                         decimal: true,
                       ),
-                      decoration: InputDecoration(
-                        labelText: 'MRP (\$ - Optional)',
-                        prefixIcon: const Icon(Icons.money_off),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                      ),
+                      labelText: 'MRP (₹ - Optional)',
+                      hintText: '50.00',
+                      prefixIcon: Icons.money_off_rounded,
                       validator: (value) {
                         if (value != null && value.trim().isNotEmpty) {
                           if (double.tryParse(value) == null ||
                               double.parse(value) <= 0) {
-                            return 'Enter valid MRP';
+                            return 'वैध MRP दर्ज करें';
                           }
                         }
                         return null;
@@ -307,73 +284,39 @@ class _CreateProductViewState extends ConsumerState<CreateProductView> {
                   ),
                 ],
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: AppSpacing.m),
 
-              TextFormField(
+              AppTextField(
                 controller: _stockController,
                 keyboardType: TextInputType.number,
-                decoration: InputDecoration(
-                  labelText: 'Stock Units',
-                  prefixIcon: const Icon(Icons.inventory_2_outlined),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                ),
+                labelText: 'स्टॉक मात्रा (Stock Units)',
+                hintText: '100',
+                prefixIcon: Icons.inventory_2_outlined,
                 validator: (value) {
                   if (value == null || value.trim().isEmpty) {
-                    return 'Stock is required';
+                    return 'स्टॉक आवश्यक है';
                   }
                   if (int.tryParse(value) == null || int.parse(value) < 0) {
-                    return 'Enter valid stock';
+                    return 'वैध स्टॉक दर्ज करें';
                   }
                   return null;
                 },
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: AppSpacing.m),
 
-              TextFormField(
+              AppTextField(
                 controller: _descController,
+                labelText: 'उत्पाद विवरण (Description)',
+                hintText: 'उत्पाद के फायदे, वजन आदि के बारे में लिखें...',
+                prefixIcon: Icons.description_outlined,
                 maxLines: 4,
-                decoration: InputDecoration(
-                  labelText: 'Product Description',
-                  prefixIcon: const Icon(Icons.description_outlined),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                ),
               ),
-              const SizedBox(height: 32),
+              const SizedBox(height: AppSpacing.xl),
 
-              SizedBox(
-                width: double.infinity,
-                height: 50,
-                child: ElevatedButton.icon(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.orange,
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                  onPressed: opsState.isLoading ? null : _submit,
-                  icon: opsState.isLoading
-                      ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(
-                            color: Colors.white,
-                            strokeWidth: 2,
-                          ),
-                        )
-                      : const Icon(Icons.check),
-                  label: Text(
-                    opsState.isLoading ? 'Listing...' : 'List Product',
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
+              PrimaryButton(
+                text: 'उत्पाद जोड़े (List Product)',
+                isLoading: opsState.isLoading,
+                onPressed: _submit,
               ),
             ],
           ),

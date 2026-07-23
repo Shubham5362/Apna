@@ -235,6 +235,7 @@ class AppTextField extends StatelessWidget {
   final FocusNode? focusNode;
   final String? prefixText;
   final List<TextInputFormatter>? inputFormatters;
+  final int? maxLines;
 
   const AppTextField({
     super.key,
@@ -250,6 +251,7 @@ class AppTextField extends StatelessWidget {
     this.focusNode,
     this.prefixText,
     this.inputFormatters,
+    this.maxLines = 1,
   });
 
   @override
@@ -263,6 +265,7 @@ class AppTextField extends StatelessWidget {
       onChanged: onChanged,
       focusNode: focusNode,
       inputFormatters: inputFormatters,
+      maxLines: maxLines,
       style: theme.textTheme.bodyLarge?.copyWith(
         color: theme.colorScheme.onSurface,
       ),

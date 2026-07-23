@@ -1,6 +1,7 @@
 // ignore_for_file: deprecated_member_use
 
 import 'dart:math' as math;
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -184,7 +185,7 @@ class _ForgotPasswordViewState extends ConsumerState<ForgotPasswordView>
         }
       }
     } catch (e) {
-      if (otp == '123456') {
+      if (kDebugMode && otp == '123456') {
         setState(() {
           _currentStep = 3;
         });

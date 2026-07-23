@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/providers.dart';
+import '../../core/theme.dart';
+import '../widgets/reusable_widgets.dart';
 
 class EditShopView extends ConsumerStatefulWidget {
   final int shopId;
@@ -48,20 +50,18 @@ class _EditShopViewState extends ConsumerState<EditShopView> {
           .updateShop(widget.shopId, data);
       if (mounted) {
         if (success) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Shop updated successfully!'),
-              backgroundColor: Colors.green,
-            ),
+          AppSnackbar.show(
+            context,
+            message:
+                'दुकान की जानकारी अपडेट की गई! (Shop updated successfully)',
           );
           context.go('/shops/${widget.shopId}');
         } else {
           final error = ref.read(shopOpsProvider).error;
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Failed to update shop: $error'),
-              backgroundColor: Colors.red,
-            ),
+          AppSnackbar.show(
+            context,
+            message: 'अपडेट करने में विफल: $error',
+            isError: true,
           );
         }
       }
@@ -70,12 +70,14 @@ class _EditShopViewState extends ConsumerState<EditShopView> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final shopAsync = ref.watch(shopDetailsProvider(widget.shopId));
     final opsState = ref.watch(shopOpsProvider);
 
     return Scaffold(
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        title: const Text('Edit Shop'),
+        title: const Text('दुकान संपादित करें (Edit Shop)'),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => context.go('/shops/${widget.shopId}'),
@@ -91,45 +93,38 @@ class _EditShopViewState extends ConsumerState<EditShopView> {
           }
 
           return SingleChildScrollView(
-            padding: const EdgeInsets.all(16.0),
+            physics: const BouncingScrollPhysics(),
+            padding: const EdgeInsets.all(AppSpacing.l),
             child: Form(
               key: _formKey,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  TextFormField(
+                  AppTextField(
                     controller: _nameController,
-                    decoration: InputDecoration(
-                      labelText: 'Shop Name',
-                      prefixIcon: const Icon(Icons.storefront),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
+                    labelText: 'दुकान का नाम (Shop Name)',
+                    hintText: 'उदा. माँ दुर्गा प्रोविजन स्टोर',
+                    prefixIcon: Icons.storefront_rounded,
                     validator: (value) {
                       if (value == null || value.trim().isEmpty) {
-                        return 'Shop name is required';
+                        return 'दुकान का नाम आवश्यक है';
                       }
                       return null;
                     },
                   ),
-                  const SizedBox(height: 16),
-                  TextFormField(
+                  const SizedBox(height: AppSpacing.m),
+                  AppTextField(
                     controller: _descController,
+                    labelText: 'दुकान का विवरण (Description)',
+                    hintText: 'अपनी दुकान के बारे में कुछ बताएं...',
+                    prefixIcon: Icons.description_outlined,
                     maxLines: 4,
-                    decoration: InputDecoration(
-                      labelText: 'Shop Description',
-                      prefixIcon: const Icon(Icons.description_outlined),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: AppSpacing.m),
                   SwitchListTile(
-                    title: const Text('Is Shop Active?'),
+                    title: const Text('दुकान सक्रिय है? (Is Shop Active?)'),
                     subtitle: const Text(
-                      'Inactive shops are hidden from the public.',
+                      'निष्क्रिय दुकानों को सार्वजनिक रूप से छिपाया जाता है।',
                     ),
                     value: _isActive,
                     onChanged: (val) {
@@ -137,39 +132,13 @@ class _EditShopViewState extends ConsumerState<EditShopView> {
                         _isActive = val;
                       });
                     },
-                    secondary: const Icon(Icons.power_settings_new),
+                    secondary: const Icon(Icons.power_settings_new_rounded),
                   ),
-                  const SizedBox(height: 32),
-                  SizedBox(
-                    width: double.infinity,
-                    height: 50,
-                    child: ElevatedButton.icon(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.blue,
-                        foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                      ),
-                      onPressed: opsState.isLoading ? null : _submit,
-                      icon: opsState.isLoading
-                          ? const SizedBox(
-                              width: 20,
-                              height: 20,
-                              child: CircularProgressIndicator(
-                                color: Colors.white,
-                                strokeWidth: 2,
-                              ),
-                            )
-                          : const Icon(Icons.check),
-                      label: Text(
-                        opsState.isLoading ? 'Saving...' : 'Save Changes',
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
+                  const SizedBox(height: AppSpacing.xl),
+                  PrimaryButton(
+                    text: 'बदलाव सुरक्षित करें (Save Changes)',
+                    isLoading: opsState.isLoading,
+                    onPressed: _submit,
                   ),
                 ],
               ),

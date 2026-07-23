@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../core/providers.dart';
+import '../core/theme.dart';
+import 'widgets/reusable_widgets.dart';
 
 class UserProfileView extends ConsumerStatefulWidget {
   const UserProfileView({super.key});
@@ -122,19 +124,17 @@ class _UserProfileViewState extends ConsumerState<UserProfileView> {
 
       if (mounted) {
         if (success) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Profile updated successfully!'),
-              backgroundColor: Colors.green,
-            ),
+          AppSnackbar.show(
+            context,
+            message:
+                'प्रोफ़ाइल सफलतापूर्वक अपडेट की गई! (Profile updated successfully)',
           );
         } else {
           final error = ref.read(userProfileProvider).error;
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Failed to update profile: $error'),
-              backgroundColor: Colors.red,
-            ),
+          AppSnackbar.show(
+            context,
+            message: 'प्रोफ़ाइल अपडेट विफल: $error',
+            isError: true,
           );
         }
       }
@@ -150,19 +150,16 @@ class _UserProfileViewState extends ConsumerState<UserProfileView> {
 
     if (mounted) {
       if (success) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Profile photo uploaded and updated successfully!'),
-            backgroundColor: Colors.green,
-          ),
+        AppSnackbar.show(
+          context,
+          message: 'प्रोफ़ाइल तस्वीर अपडेट की गई! (Profile photo updated)',
         );
       } else {
         final error = ref.read(userProfileProvider).error;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Failed to upload photo: $error'),
-            backgroundColor: Colors.red,
-          ),
+        AppSnackbar.show(
+          context,
+          message: 'तस्वीर अपडेट करने में विफल: $error',
+          isError: true,
         );
       }
     }
@@ -170,6 +167,9 @@ class _UserProfileViewState extends ConsumerState<UserProfileView> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     final profileState = ref.watch(userProfileProvider);
     final profile = profileState.profile;
 
@@ -188,11 +188,16 @@ class _UserProfileViewState extends ConsumerState<UserProfileView> {
     final fullPhotoUrl = photoUrl != null ? '$baseUrl$photoUrl' : null;
 
     return Scaffold(
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        title: const Text('User Profile'),
+        title: const Text('मेरी प्रोफ़ाइल (User Profile)'),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => context.go('/'),
+        ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.refresh),
+            icon: const Icon(Icons.refresh_rounded),
             onPressed: () =>
                 ref.read(userProfileProvider.notifier).fetchProfile(),
           ),
@@ -201,7 +206,8 @@ class _UserProfileViewState extends ConsumerState<UserProfileView> {
       body: profileState.isLoading && profile == null
           ? const Center(child: CircularProgressIndicator())
           : SingleChildScrollView(
-              padding: const EdgeInsets.all(16.0),
+              physics: const BouncingScrollPhysics(),
+              padding: const EdgeInsets.all(AppSpacing.l),
               child: Form(
                 key: _formKey,
                 child: Column(
@@ -213,95 +219,109 @@ class _UserProfileViewState extends ConsumerState<UserProfileView> {
                       children: [
                         CircleAvatar(
                           radius: 60,
-                          backgroundColor: Colors.blue.shade100,
+                          backgroundColor: theme.colorScheme.primary
+                              .withOpacity(0.1),
                           backgroundImage: fullPhotoUrl != null
                               ? NetworkImage(fullPhotoUrl)
                               : null,
                           child: fullPhotoUrl == null
-                              ? const Icon(
-                                  Icons.person,
+                              ? Icon(
+                                  Icons.person_rounded,
                                   size: 60,
-                                  color: Colors.blue,
+                                  color: theme.colorScheme.primary,
                                 )
                               : null,
                         ),
-                        CircleAvatar(
-                          backgroundColor: Colors.blue,
-                          radius: 18,
-                          child: IconButton(
-                            icon: const Icon(
-                              Icons.camera_alt,
-                              size: 16,
-                              color: Colors.white,
-                            ),
-                            onPressed: _uploadMockPhoto,
-                          ),
+                        FloatingActionButton.small(
+                          onPressed: _uploadMockPhoto,
+                          backgroundColor: theme.colorScheme.primary,
+                          foregroundColor: theme.colorScheme.onPrimary,
+                          child: const Icon(Icons.camera_alt_rounded),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: AppSpacing.l),
 
-                    // Completion percentage
+                    // Completion percentage card
                     Card(
                       elevation: 0,
-                      color: Colors.blue.shade50,
+                      color: isDark
+                          ? Colors.grey.shade900
+                          : theme.colorScheme.primary.withOpacity(0.05),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(AppBorderRadius.m),
+                      ),
                       child: Padding(
-                        padding: const EdgeInsets.all(16.0),
+                        padding: const EdgeInsets.all(AppSpacing.l),
                         child: Column(
                           children: [
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 Text(
-                                  'Profile Completion',
-                                  style: Theme.of(context).textTheme.titleMedium
-                                      ?.copyWith(
-                                        color: Colors.blue.shade900,
-                                        fontWeight: FontWeight.bold,
-                                      ),
+                                  'प्रोफ़ाइल पूर्णता (Profile Completion)',
+                                  style: theme.textTheme.titleMedium?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                  ),
                                 ),
                                 Text(
                                   '$completionPercent%',
-                                  style: Theme.of(context).textTheme.titleMedium
-                                      ?.copyWith(
-                                        color: Colors.blue.shade900,
-                                        fontWeight: FontWeight.bold,
-                                      ),
+                                  style: theme.textTheme.titleMedium?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                    color: theme.colorScheme.primary,
+                                  ),
                                 ),
                               ],
                             ),
-                            const SizedBox(height: 8),
+                            const SizedBox(height: AppSpacing.s),
                             LinearProgressIndicator(
                               value: completionPercent / 100.0,
-                              backgroundColor: Colors.blue.shade100,
-                              color: Colors.blue,
+                              backgroundColor: theme.colorScheme.primary
+                                  .withOpacity(0.1),
+                              color: theme.colorScheme.primary,
                               minHeight: 8,
-                              borderRadius: BorderRadius.circular(4),
+                              borderRadius: BorderRadius.circular(
+                                AppBorderRadius.s,
+                              ),
                             ),
                           ],
                         ),
                       ),
                     ),
-                    const SizedBox(height: 24),
+                    const SizedBox(height: AppSpacing.xl),
 
-                    // Fields
-                    _buildTextField(
+                    // Personal details section label
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        'व्यक्तिगत जानकारी (Personal Information)',
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: theme.colorScheme.primary,
+                        ),
+                      ),
+                    ),
+                    const Divider(height: 24),
+
+                    AppTextField(
                       controller: _fullNameController,
-                      label: 'Full Name',
-                      icon: Icons.person,
+                      labelText: 'पूरा नाम (Full Name)',
+                      hintText: 'उदा. राम कुमार',
+                      prefixIcon: Icons.person_outline_rounded,
                       validator: (value) {
                         if (value == null || value.trim().isEmpty) {
-                          return 'Full name is required';
+                          return 'पूरा नाम आवश्यक है';
                         }
                         return null;
                       },
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: AppSpacing.m),
 
-                    _buildTextField(
+                    AppTextField(
                       controller: _emailController,
-                      label: 'Email (Optional)',
-                      icon: Icons.email,
+                      labelText: 'ईमेल (Email - Optional)',
+                      hintText: 'ram@example.com',
+                      prefixIcon: Icons.email_outlined,
                       keyboardType: TextInputType.emailAddress,
                       validator: (value) {
                         if (value != null && value.trim().isNotEmpty) {
@@ -309,29 +329,31 @@ class _UserProfileViewState extends ConsumerState<UserProfileView> {
                             r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
                           );
                           if (!emailRegExp.hasMatch(value.trim())) {
-                            return 'Enter a valid email address';
+                            return 'वैध ईमेल आईडी दर्ज करें';
                           }
                         }
                         return null;
                       },
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: AppSpacing.m),
 
                     Row(
                       children: [
                         Expanded(
-                          child: _buildTextField(
+                          child: AppTextField(
                             controller: _genderController,
-                            label: 'Gender',
-                            icon: Icons.wc,
+                            labelText: 'लिंग (Gender)',
+                            hintText: 'Male / Female',
+                            prefixIcon: Icons.wc_rounded,
                           ),
                         ),
-                        const SizedBox(width: 16),
+                        const SizedBox(width: AppSpacing.m),
                         Expanded(
-                          child: _buildTextField(
+                          child: AppTextField(
                             controller: _dobController,
-                            label: 'Date of Birth (YYYY-MM-DD)',
-                            icon: Icons.calendar_today,
+                            labelText: 'जन्म तिथि (DOB)',
+                            hintText: 'YYYY-MM-DD',
+                            prefixIcon: Icons.calendar_today_rounded,
                             keyboardType: TextInputType.datetime,
                             validator: (value) {
                               if (value != null && value.trim().isNotEmpty) {
@@ -339,7 +361,7 @@ class _UserProfileViewState extends ConsumerState<UserProfileView> {
                                   r'^\d{4}-\d{2}-\d{2}$',
                                 );
                                 if (!dateRegExp.hasMatch(value.trim())) {
-                                  return 'Use YYYY-MM-DD format';
+                                  return 'YYYY-MM-DD प्रारूप का उपयोग करें';
                                 }
                               }
                               return null;
@@ -348,135 +370,114 @@ class _UserProfileViewState extends ConsumerState<UserProfileView> {
                         ),
                       ],
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: AppSpacing.xl),
 
-                    _buildTextField(
-                      controller: _addressController,
-                      label: 'Address',
-                      icon: Icons.home,
+                    // Contact & address details section label
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        'पता और संपर्क (Contact & Address)',
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: theme.colorScheme.primary,
+                        ),
+                      ),
                     ),
-                    const SizedBox(height: 16),
+                    const Divider(height: 24),
+
+                    AppTextField(
+                      controller: _addressController,
+                      labelText: 'पता (Street Address)',
+                      hintText: 'मकान नंबर, वार्ड नंबर, गली नंबर',
+                      prefixIcon: Icons.home_outlined,
+                    ),
+                    const SizedBox(height: AppSpacing.m),
 
                     Row(
                       children: [
                         Expanded(
-                          child: _buildTextField(
+                          child: AppTextField(
                             controller: _cityController,
-                            label: 'City',
-                            icon: Icons.location_city,
+                            labelText: 'शहर (City)',
+                            hintText: 'मंडला',
+                            prefixIcon: Icons.location_city_rounded,
                           ),
                         ),
-                        const SizedBox(width: 16),
+                        const SizedBox(width: AppSpacing.m),
                         Expanded(
-                          child: _buildTextField(
+                          child: AppTextField(
                             controller: _stateController,
-                            label: 'State',
-                            icon: Icons.map,
+                            labelText: 'राज्य (State)',
+                            hintText: 'मध्य प्रदेश',
+                            prefixIcon: Icons.map_rounded,
                           ),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: AppSpacing.m),
 
                     Row(
                       children: [
                         Expanded(
-                          child: _buildTextField(
+                          child: AppTextField(
                             controller: _pincodeController,
-                            label: 'Pincode',
-                            icon: Icons.pin_drop,
+                            labelText: 'पिनकोड (Pincode)',
+                            hintText: '481661',
+                            prefixIcon: Icons.pin_drop_rounded,
                             keyboardType: TextInputType.number,
                           ),
                         ),
-                        const SizedBox(width: 16),
+                        const SizedBox(width: AppSpacing.m),
                         Expanded(
-                          child: _buildTextField(
+                          child: AppTextField(
                             controller: _countryController,
-                            label: 'Country',
-                            icon: Icons.public,
+                            labelText: 'देश (Country)',
+                            hintText: 'भारत',
+                            prefixIcon: Icons.public_rounded,
                           ),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: AppSpacing.m),
 
                     Row(
                       children: [
                         Expanded(
-                          child: _buildTextField(
+                          child: AppTextField(
                             controller: _languageController,
-                            label: 'Language',
-                            icon: Icons.language,
+                            labelText: 'भाषा (Language)',
+                            hintText: 'Hindi / English',
+                            prefixIcon: Icons.language_rounded,
                           ),
                         ),
-                        const SizedBox(width: 16),
+                        const SizedBox(width: AppSpacing.m),
                         Expanded(
-                          child: _buildTextField(
+                          child: AppTextField(
                             controller: _timezoneController,
-                            label: 'Timezone',
-                            icon: Icons.access_time,
+                            labelText: 'समय क्षेत्र (Timezone)',
+                            hintText: 'Asia/Kolkata',
+                            prefixIcon: Icons.access_time_rounded,
                           ),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 24),
+                    const SizedBox(height: AppSpacing.xl),
 
-                    // Save Button
-                    SizedBox(
-                      width: double.infinity,
-                      height: 50,
-                      child: ElevatedButton.icon(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.blue,
-                          foregroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                        ),
-                        onPressed: profileState.isLoading ? null : _saveProfile,
-                        icon: profileState.isLoading
-                            ? const SizedBox(
-                                width: 20,
-                                height: 20,
-                                child: CircularProgressIndicator(
-                                  color: Colors.white,
-                                  strokeWidth: 2,
-                                ),
-                              )
-                            : const Icon(Icons.save),
-                        label: Text(
-                          profileState.isLoading ? 'Saving...' : 'Save Profile',
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
+                    // Actions Box
+                    PrimaryButton(
+                      text: 'प्रोफ़ाइल सुरक्षित करें (Save Profile)',
+                      isLoading: profileState.isLoading,
+                      onPressed: _saveProfile,
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: AppSpacing.m),
 
-                    // Payment History Button
-                    SizedBox(
-                      width: double.infinity,
-                      height: 50,
-                      child: OutlinedButton.icon(
-                        style: OutlinedButton.styleFrom(
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                        ),
-                        onPressed: () => context.go('/payments/history'),
-                        icon: const Icon(Icons.history),
-                        label: const Text(
-                          'View Payment History',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
+                    OutlineButton(
+                      text: 'भुगतान इतिहास देखें (Payment History)',
+                      icon: Icons.history_rounded,
+                      onPressed: () => context.go('/payments/history'),
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: AppSpacing.l),
+
                     if (profileState.error != null)
                       Text(
                         profileState.error!,
@@ -487,29 +488,6 @@ class _UserProfileViewState extends ConsumerState<UserProfileView> {
                 ),
               ),
             ),
-    );
-  }
-
-  Widget _buildTextField({
-    required TextEditingController controller,
-    required String label,
-    required IconData icon,
-    TextInputType keyboardType = TextInputType.text,
-    String? Function(String?)? validator,
-  }) {
-    return TextFormField(
-      controller: controller,
-      keyboardType: keyboardType,
-      validator: validator,
-      decoration: InputDecoration(
-        labelText: label,
-        prefixIcon: Icon(icon),
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 16,
-          vertical: 12,
-        ),
-      ),
     );
   }
 }

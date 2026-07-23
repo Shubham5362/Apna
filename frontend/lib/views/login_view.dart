@@ -1,6 +1,7 @@
 // ignore_for_file: deprecated_member_use
 
 import 'dart:math' as math;
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -303,7 +304,7 @@ class _LoginViewState extends ConsumerState<LoginView>
         }
       }
     } catch (e) {
-      if (otp == '123456') {
+      if (kDebugMode && otp == '123456') {
         ref.read(authTokenProvider.notifier).state = 'mock_jwt_token';
         if (mounted) {
           _showSuccessAnimation();
@@ -352,7 +353,7 @@ class _LoginViewState extends ConsumerState<LoginView>
         }
       }
     } catch (e) {
-      if (phone == '9876543210' && password == 'secretpassword') {
+      if (kDebugMode && phone == '9876543210' && password == 'secretpassword') {
         ref.read(authTokenProvider.notifier).state = 'mock_jwt_token';
         if (mounted) {
           _showSuccessAnimation();

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/providers.dart';
+import '../../core/theme.dart';
+import '../widgets/reusable_widgets.dart';
 
 class CreateShopView extends ConsumerStatefulWidget {
   const CreateShopView({super.key});
@@ -41,21 +43,19 @@ class _CreateShopViewState extends ConsumerState<CreateShopView> {
       final shop = await ref.read(shopOpsProvider.notifier).createShop(data);
       if (mounted) {
         if (shop != null) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Shop created successfully!'),
-              backgroundColor: Colors.green,
-            ),
+          AppSnackbar.show(
+            context,
+            message:
+                'दुकान सफलतापूर्वक पंजीकृत की गई! (Shop created successfully)',
           );
           final id = shop['id'] as int;
           context.go('/shops/$id');
         } else {
           final error = ref.read(shopOpsProvider).error;
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Failed to create shop: $error'),
-              backgroundColor: Colors.red,
-            ),
+          AppSnackbar.show(
+            context,
+            message: 'पंजीकरण विफल: $error',
+            isError: true,
           );
         }
       }
@@ -64,94 +64,65 @@ class _CreateShopViewState extends ConsumerState<CreateShopView> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final opsState = ref.watch(shopOpsProvider);
 
     return Scaffold(
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        title: const Text('Create Your Shop'),
+        title: const Text('दुकान पंजीकृत करें (Register Shop)'),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => context.go('/shops'),
         ),
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
+        physics: const BouncingScrollPhysics(),
+        padding: const EdgeInsets.all(AppSpacing.l),
         child: Form(
           key: _formKey,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Let\'s build your online presence!',
-                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                'अपना मांडला में आपकी दुकान!',
+                style: theme.textTheme.headlineSmall?.copyWith(
                   fontWeight: FontWeight.bold,
+                  color: theme.colorScheme.primary,
                 ),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: AppSpacing.s),
               const Text(
-                'Please enter your shop details below. You can only create one shop.',
-                style: TextStyle(color: Colors.grey),
+                'कृपया अपनी दुकान का नाम और विवरण नीचे दर्ज करें। आप केवल एक दुकान पंजीकृत कर सकते हैं।',
+                style: TextStyle(color: AppColors.textSecondary),
               ),
-              const SizedBox(height: 24),
-              TextFormField(
+              const SizedBox(height: AppSpacing.xl),
+              AppTextField(
                 controller: _nameController,
-                decoration: InputDecoration(
-                  labelText: 'Shop Name',
-                  prefixIcon: const Icon(Icons.storefront),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                ),
+                labelText: 'दुकान का नाम (Shop Name)',
+                hintText: 'उदा. माँ दुर्गा प्रोविजन स्टोर',
+                prefixIcon: Icons.storefront_rounded,
                 validator: (value) {
                   if (value == null || value.trim().isEmpty) {
-                    return 'Shop name is required';
+                    return 'दुकान का नाम आवश्यक है';
                   }
                   return null;
                 },
               ),
-              const SizedBox(height: 16),
-              TextFormField(
+              const SizedBox(height: AppSpacing.m),
+              AppTextField(
                 controller: _descController,
+                labelText: 'दुकान का विवरण (Description)',
+                hintText:
+                    'अपनी दुकान और बेचे जाने वाले सामानों के बारे में बताएं...',
+                prefixIcon: Icons.description_outlined,
                 maxLines: 4,
-                decoration: InputDecoration(
-                  labelText: 'Shop Description',
-                  prefixIcon: const Icon(Icons.description_outlined),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                ),
               ),
-              const SizedBox(height: 32),
-              SizedBox(
-                width: double.infinity,
-                height: 50,
-                child: ElevatedButton.icon(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blue,
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                  onPressed: opsState.isLoading ? null : _submit,
-                  icon: opsState.isLoading
-                      ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(
-                            color: Colors.white,
-                            strokeWidth: 2,
-                          ),
-                        )
-                      : const Icon(Icons.check),
-                  label: Text(
-                    opsState.isLoading ? 'Creating...' : 'Create Shop',
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
+              const SizedBox(height: AppSpacing.xl),
+              PrimaryButton(
+                text: 'दुकान पंजीकृत करें (Register Shop)',
+                isLoading: opsState.isLoading,
+                onPressed: _submit,
               ),
             ],
           ),
