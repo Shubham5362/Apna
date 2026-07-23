@@ -7,6 +7,7 @@ from app.core.config import settings
 from app.core.logging import setup_logging
 from app.core.exceptions import register_exception_handlers
 from app.api.v1.router import api_router
+from app.api.v1.endpoints.health import router as health_router
 
 # 1. Initialize Logging
 setup_logging()
@@ -15,9 +16,9 @@ setup_logging()
 app = FastAPI(
     title=settings.PROJECT_NAME,
     version=settings.VERSION,
-    openapi_url=f"{settings.API_V1_STR}/openapi.json",
-    docs_url=f"{settings.API_V1_STR}/docs",
-    redoc_url=f"{settings.API_V1_STR}/redoc",
+    openapi_url="/openapi.json",
+    docs_url="/docs",
+    redoc_url="/redoc",
 )
 
 # 3. Configure CORS
@@ -41,6 +42,7 @@ os.makedirs("uploads/shops", exist_ok=True)
 os.makedirs("uploads/products", exist_ok=True)
 app.mount("/static", StaticFiles(directory="uploads"), name="static")
 
+app.include_router(health_router, prefix="")
 app.include_router(api_router, prefix=settings.API_V1_STR)
 
 
@@ -49,5 +51,5 @@ def read_root():
     return {
         "message": f"Welcome to {settings.PROJECT_NAME}",
         "version": settings.VERSION,
-        "docs_url": f"{settings.API_V1_STR}/docs"
+        "docs_url": "/docs"
     }
