@@ -1,4 +1,6 @@
 {
+  "buildCommand": "./install-and-build.sh",
+  "outputDirectory": "build/web",
   "cleanUrls": true,
   "rewrites": [
     { "source": "/(.*)", "destination": "/" }
