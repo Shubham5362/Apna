@@ -79,7 +79,7 @@ class AuthScreen extends StatelessWidget {
                             text: 'APNA ',
                             style: TextStyle(
                               fontSize: 28,
-                              fontWeight: FontWeight.black,
+                              fontWeight: FontWeight.w900,
                               color: AppColors.darkText,
                               letterSpacing: 0.5,
                             ),
@@ -88,7 +88,7 @@ class AuthScreen extends StatelessWidget {
                             text: 'MANDLA',
                             style: TextStyle(
                               fontSize: 28,
-                              fontWeight: FontWeight.black,
+                              fontWeight: FontWeight.w900,
                               color: AppColors.primaryGreen,
                               letterSpacing: 0.5,
                             ),
