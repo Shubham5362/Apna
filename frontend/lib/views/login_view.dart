@@ -265,19 +265,11 @@ class _LoginViewState extends ConsumerState<LoginView>
         errMsg = e.message!;
       }
       if (mounted) {
-        AppSnackbar.show(
-          context,
-          message: errMsg,
-          isError: true,
-        );
+        AppSnackbar.show(context, message: errMsg, isError: true);
       }
     } catch (e) {
       if (mounted) {
-        AppSnackbar.show(
-          context,
-          message: e.toString(),
-          isError: true,
-        );
+        AppSnackbar.show(context, message: e.toString(), isError: true);
       }
     } finally {
       setState(() {
@@ -325,19 +317,11 @@ class _LoginViewState extends ConsumerState<LoginView>
         errMsg = e.message!;
       }
       if (mounted) {
-        AppSnackbar.show(
-          context,
-          message: errMsg,
-          isError: true,
-        );
+        AppSnackbar.show(context, message: errMsg, isError: true);
       }
     } catch (e) {
       if (mounted) {
-        AppSnackbar.show(
-          context,
-          message: e.toString(),
-          isError: true,
-        );
+        AppSnackbar.show(context, message: e.toString(), isError: true);
       }
     } finally {
       setState(() {
@@ -575,7 +559,9 @@ class _LoginViewState extends ConsumerState<LoginView>
         const SizedBox(height: AppSpacing.l),
         if (!_otpSent) ...[
           PrimaryButton(
-            text: _isRegistering ? 'रजिस्टर करें और ओटीपी भेजें (Register & Send OTP)' : 'ओटीपी भेजें (Send OTP)',
+            text: _isRegistering
+                ? 'रजिस्टर करें और ओटीपी भेजें (Register & Send OTP)'
+                : 'ओटीपी भेजें (Send OTP)',
             isLoading: _isLoading,
             onPressed: _sendOtp,
           ),
@@ -596,7 +582,9 @@ class _LoginViewState extends ConsumerState<LoginView>
           Text(
             'हमने आपके नंबर पर ओटीपी भेजा है। (We sent an OTP to your phone.)',
             textAlign: TextAlign.center,
-            style: theme.textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: AppColors.textSecondary,
+            ),
           ),
           const SizedBox(height: AppSpacing.m),
           OtpInput(

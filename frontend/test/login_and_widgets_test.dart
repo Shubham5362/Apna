@@ -106,7 +106,10 @@ void main() {
         await tester.pump();
 
         // Tap on Register toggle button
-        await tester.tap(find.textContaining('खाता बनाएँ'), warnIfMissed: false);
+        await tester.tap(
+          find.textContaining('खाता बनाएँ'),
+          warnIfMissed: false,
+        );
         await tester.pump(const Duration(milliseconds: 500));
 
         // Verify view has transitioned to Register mode, showing "Full Name" label and "Register & Send OTP" button

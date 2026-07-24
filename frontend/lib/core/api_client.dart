@@ -46,7 +46,10 @@ class ApiClient {
   }
 
   // --- Auth APIs ---
-  Future<Map<String, dynamic>> register(String phoneNumber, String? fullName) async {
+  Future<Map<String, dynamic>> register(
+    String phoneNumber,
+    String? fullName,
+  ) async {
     final response = await dio.post(
       '/api/v1/auth/register',
       data: {'phone_number': phoneNumber, 'full_name': fullName},
