@@ -116,8 +116,6 @@ class HealthDashboardView extends ConsumerWidget {
                       foregroundColor: Colors.white,
                     ),
                     onPressed: () {
-                      ref.read(authTokenProvider.notifier).state =
-                          'mock_jwt_token';
                       context.go('/profile');
                     },
                     icon: const Icon(Icons.person),
@@ -129,8 +127,6 @@ class HealthDashboardView extends ConsumerWidget {
                       foregroundColor: Colors.white,
                     ),
                     onPressed: () {
-                      ref.read(authTokenProvider.notifier).state =
-                          'mock_jwt_token';
                       context.go('/shops');
                     },
                     icon: const Icon(Icons.store),
@@ -142,8 +138,6 @@ class HealthDashboardView extends ConsumerWidget {
                       foregroundColor: Colors.white,
                     ),
                     onPressed: () {
-                      ref.read(authTokenProvider.notifier).state =
-                          'mock_jwt_token';
                       context.go('/products');
                     },
                     icon: const Icon(Icons.shopping_bag),
@@ -155,8 +149,6 @@ class HealthDashboardView extends ConsumerWidget {
                       foregroundColor: Colors.white,
                     ),
                     onPressed: () {
-                      ref.read(authTokenProvider.notifier).state =
-                          'mock_jwt_token';
                       context.go('/cart');
                     },
                     icon: const Icon(Icons.shopping_cart),
@@ -168,8 +160,6 @@ class HealthDashboardView extends ConsumerWidget {
                       foregroundColor: Colors.white,
                     ),
                     onPressed: () {
-                      ref.read(authTokenProvider.notifier).state =
-                          'mock_jwt_token';
                       context.go('/orders');
                     },
                     icon: const Icon(Icons.receipt_long),
