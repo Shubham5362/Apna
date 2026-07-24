@@ -133,6 +133,11 @@ jobs:
           cd frontend
           flutter pub get
 
+      - name: Build Flutter Web
+        run: |
+          cd frontend
+          flutter build web --release --dart-define=BACKEND_URL=https://apna-mandla-backend.onrender.com
+
       - name: Build APK
         run: |
           cd frontend

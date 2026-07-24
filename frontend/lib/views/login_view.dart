@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:dio/dio.dart';
 
 import '../core/providers.dart';
 import '../core/theme.dart';
@@ -149,15 +150,15 @@ class _LoginViewState extends ConsumerState<LoginView>
 
   final _formKey = GlobalKey<FormState>();
   final _phoneController = TextEditingController();
-  final _passwordController = TextEditingController();
+  final _fullNameController = TextEditingController();
   final _otpCompletedController = TextEditingController();
 
   final _phoneFocusNode = FocusNode();
-  final _passwordFocusNode = FocusNode();
+  final _fullNameFocusNode = FocusNode();
   final _otpFocusNode = FocusNode();
 
   bool _isFocused = false;
-  int _activeTab = 0; // 0 = Password Login, 1 = OTP Login
+  bool _isRegistering = false;
   bool _otpSent = false;
   bool _isLoading = false;
 
@@ -176,7 +177,7 @@ class _LoginViewState extends ConsumerState<LoginView>
 
     // Listen to focus changes
     _phoneFocusNode.addListener(_handleFocusChange);
-    _passwordFocusNode.addListener(_handleFocusChange);
+    _fullNameFocusNode.addListener(_handleFocusChange);
     _otpFocusNode.addListener(_handleFocusChange);
   }
 
@@ -185,13 +186,13 @@ class _LoginViewState extends ConsumerState<LoginView>
     _rotationController.dispose();
     _transitionController.dispose();
     _phoneController.dispose();
-    _passwordController.dispose();
+    _fullNameController.dispose();
     _otpCompletedController.dispose();
     _phoneFocusNode.removeListener(_handleFocusChange);
-    _passwordFocusNode.removeListener(_handleFocusChange);
+    _fullNameFocusNode.removeListener(_handleFocusChange);
     _otpFocusNode.removeListener(_handleFocusChange);
     _phoneFocusNode.dispose();
-    _passwordFocusNode.dispose();
+    _fullNameFocusNode.dispose();
     _otpFocusNode.dispose();
     super.dispose();
   }
@@ -199,7 +200,7 @@ class _LoginViewState extends ConsumerState<LoginView>
   void _handleFocusChange() {
     final hasFocus =
         _phoneFocusNode.hasFocus ||
-        _passwordFocusNode.hasFocus ||
+        _fullNameFocusNode.hasFocus ||
         _otpFocusNode.hasFocus;
     if (hasFocus != _isFocused) {
       setState(() {
@@ -210,10 +211,21 @@ class _LoginViewState extends ConsumerState<LoginView>
 
   Future<void> _sendOtp() async {
     final phone = _phoneController.text.trim();
+    final fullName = _fullNameController.text.trim();
+
     if (phone.isEmpty || phone.length < 10) {
       AppSnackbar.show(
         context,
         message: 'कृपया वैध मोबाइल नंबर दर्ज करें (Invalid phone)',
+        isError: true,
+      );
+      return;
+    }
+
+    if (_isRegistering && fullName.isEmpty) {
+      AppSnackbar.show(
+        context,
+        message: 'कृपया पूरा नाम दर्ज करें (Full name is required)',
         isError: true,
       );
       return;
@@ -225,32 +237,39 @@ class _LoginViewState extends ConsumerState<LoginView>
 
     try {
       final apiClient = ref.read(apiClientProvider);
-      final res = await apiClient.dio.post(
-        '/api/v1/auth/login-init',
-        data: {'phone_number': phone},
-      );
-
-      if (res.statusCode == 200) {
-        setState(() {
-          _otpSent = true;
-        });
-        if (mounted) {
-          AppSnackbar.show(
-            context,
-            message: 'ओटीपी सफलतापूर्वक भेजा गया! (OTP sent successfully!)',
-          );
-        }
+      if (_isRegistering) {
+        await apiClient.register(phone, fullName);
+      } else {
+        await apiClient.loginInit(phone);
       }
-    } catch (e) {
+
       setState(() {
         _otpSent = true;
       });
       if (mounted) {
         AppSnackbar.show(
           context,
-          message:
-              'कनेक्शन त्रुटि: ऑफ़लाइन मोड में जारी (Bypassed: Offline/Mock mode active)',
+          message: 'ओटीपी सफलतापूर्वक भेजा गया! (OTP sent successfully!)',
         );
+      }
+    } on DioException catch (e) {
+      String errMsg = 'त्रुटि हुई (An error occurred)';
+      if (e.response != null && e.response!.data is Map) {
+        final data = e.response!.data;
+        if (data['error'] != null && data['error']['message'] != null) {
+          errMsg = data['error']['message'];
+        } else if (data['detail'] != null) {
+          errMsg = data['detail'].toString();
+        }
+      } else if (e.message != null) {
+        errMsg = e.message!;
+      }
+      if (mounted) {
+        AppSnackbar.show(context, message: errMsg, isError: true);
+      }
+    } catch (e) {
+      if (mounted) {
+        AppSnackbar.show(context, message: e.toString(), isError: true);
       }
     } finally {
       setState(() {
@@ -278,44 +297,36 @@ class _LoginViewState extends ConsumerState<LoginView>
 
     try {
       final apiClient = ref.read(apiClientProvider);
-      final res = await apiClient.dio.post(
-        '/api/v1/auth/verify-otp',
-        data: {'phone_number': phone, 'otp': otp},
-      );
+      final res = await apiClient.verifyOtp(phone, otp);
+      final token = res['access_token'];
+      ref.read(authTokenProvider.notifier).state = token;
 
-      if (res.statusCode == 200) {
-        final data = res.data as Map<String, dynamic>;
-        final token = data['access_token'];
-        ref.read(authTokenProvider.notifier).state = token;
-
-        if (mounted) {
-          _showSuccessAnimation();
-        }
-      }
-    } catch (e) {
-      ref.read(authTokenProvider.notifier).state = 'mock_jwt_token';
       if (mounted) {
         _showSuccessAnimation();
+      }
+    } on DioException catch (e) {
+      String errMsg = 'अमान्य ओटीपी (Invalid OTP)';
+      if (e.response != null && e.response!.data is Map) {
+        final data = e.response!.data;
+        if (data['error'] != null && data['error']['message'] != null) {
+          errMsg = data['error']['message'];
+        } else if (data['detail'] != null) {
+          errMsg = data['detail'].toString();
+        }
+      } else if (e.message != null) {
+        errMsg = e.message!;
+      }
+      if (mounted) {
+        AppSnackbar.show(context, message: errMsg, isError: true);
+      }
+    } catch (e) {
+      if (mounted) {
+        AppSnackbar.show(context, message: e.toString(), isError: true);
       }
     } finally {
       setState(() {
         _isLoading = false;
       });
-    }
-  }
-
-  Future<void> _loginWithPassword() async {
-    if (!_formKey.currentState!.validate()) return;
-
-    setState(() {
-      _isLoading = true;
-    });
-
-    // Simulated premium login to bypass the OTP backend with passwords cleanly
-    await Future.delayed(const Duration(milliseconds: 1200));
-    ref.read(authTokenProvider.notifier).state = 'mock_jwt_token';
-    if (mounted) {
-      _showSuccessAnimation();
     }
   }
 
@@ -480,27 +491,10 @@ class _LoginViewState extends ConsumerState<LoginView>
                           padding: const EdgeInsets.all(AppSpacing.l),
                           child: Form(
                             key: _formKey,
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                // Tabs
-                                Row(
-                                  children: [
-                                    _buildTabButton(0, 'पासवर्ड (Password)'),
-                                    _buildTabButton(1, 'ओटीपी (OTP)'),
-                                  ],
-                                ),
-                                const SizedBox(height: AppSpacing.l),
-
-                                // Tab Contents
-                                AnimatedSize(
-                                  duration: const Duration(milliseconds: 300),
-                                  curve: Curves.easeInOut,
-                                  child: _activeTab == 0
-                                      ? _buildPasswordLoginForm()
-                                      : _buildOtpLoginForm(),
-                                ),
-                              ],
+                            child: AnimatedSize(
+                              duration: const Duration(milliseconds: 300),
+                              curve: Curves.easeInOut,
+                              child: _buildOtpLoginForm(),
                             ),
                           ),
                         ),
@@ -516,98 +510,35 @@ class _LoginViewState extends ConsumerState<LoginView>
     );
   }
 
-  Widget _buildTabButton(int index, String title) {
-    final theme = Theme.of(context);
-    final isSelected = _activeTab == index;
-
-    return Expanded(
-      child: GestureDetector(
-        onTap: () {
-          setState(() {
-            _activeTab = index;
-            _otpSent = false;
-          });
-        },
-        child: Container(
-          padding: const EdgeInsets.symmetric(vertical: AppSpacing.s),
-          decoration: BoxDecoration(
-            border: Border(
-              bottom: BorderSide(
-                color: isSelected
-                    ? theme.colorScheme.primary
-                    : Colors.transparent,
-                width: 2.5,
-              ),
-            ),
-          ),
-          child: Text(
-            title,
-            textAlign: TextAlign.center,
-            style: theme.textTheme.titleSmall?.copyWith(
-              fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-              color: isSelected
-                  ? theme.colorScheme.primary
-                  : theme.colorScheme.onSurface.withOpacity(0.5),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildPasswordLoginForm() {
-    return Column(
-      key: const ValueKey('password_form'),
-      children: [
-        AppTextField(
-          labelText: 'मोबाइल नंबर (Mobile Number)',
-          hintText: '9876543210',
-          prefixIcon: Icons.phone_android_rounded,
-          keyboardType: TextInputType.phone,
-          controller: _phoneController,
-          focusNode: _phoneFocusNode,
-          validator: (value) {
-            if (value == null || value.isEmpty) {
-              return 'कृपया मोबाइल नंबर दर्ज करें (Phone is required)';
-            }
-            if (value.length < 10) {
-              return 'अमान्य मोबाइल नंबर (Must be 10 digits)';
-            }
-            return null;
-          },
-        ),
-        const SizedBox(height: AppSpacing.m),
-        AppTextField(
-          labelText: 'पासवर्ड (Password)',
-          hintText: '••••••••',
-          prefixIcon: Icons.lock_outline_rounded,
-          obscureText: true,
-          controller: _passwordController,
-          focusNode: _passwordFocusNode,
-          validator: (value) {
-            if (value == null || value.isEmpty) {
-              return 'कृपया पासवर्ड दर्ज करें (Password is required)';
-            }
-            if (value.length < 6) {
-              return 'पासवर्ड कम से कम 6 अक्षरों का होना चाहिए (Min 6 chars)';
-            }
-            return null;
-          },
-        ),
-        const SizedBox(height: AppSpacing.l),
-        PrimaryButton(
-          text: 'प्रवेश करें (Login)',
-          isLoading: _isLoading,
-          onPressed: _loginWithPassword,
-        ),
-      ],
-    );
-  }
-
   Widget _buildOtpLoginForm() {
+    final theme = Theme.of(context);
     return Column(
       key: const ValueKey('otp_form'),
       children: [
+        Text(
+          _isRegistering ? 'नया खाता बनाएँ (Register)' : 'लॉगिन करें (Login)',
+          style: theme.textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.bold,
+            color: theme.colorScheme.primary,
+          ),
+        ),
+        const SizedBox(height: AppSpacing.m),
+        if (_isRegistering && !_otpSent) ...[
+          AppTextField(
+            labelText: 'पूरा नाम (Full Name)',
+            hintText: 'John Doe',
+            prefixIcon: Icons.person_outline_rounded,
+            controller: _fullNameController,
+            focusNode: _fullNameFocusNode,
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return 'कृपया पूरा नाम दर्ज करें (Full name is required)';
+              }
+              return null;
+            },
+          ),
+          const SizedBox(height: AppSpacing.m),
+        ],
         AppTextField(
           labelText: 'मोबाइल नंबर (Mobile Number)',
           hintText: '9876543210',
@@ -626,19 +557,34 @@ class _LoginViewState extends ConsumerState<LoginView>
           },
         ),
         const SizedBox(height: AppSpacing.l),
-        if (!_otpSent)
+        if (!_otpSent) ...[
           PrimaryButton(
-            text: 'ओटीपी भेजें (Send OTP)',
+            text: _isRegistering
+                ? 'रजिस्टर करें और ओटीपी भेजें (Register & Send OTP)'
+                : 'ओटीपी भेजें (Send OTP)',
             isLoading: _isLoading,
             onPressed: _sendOtp,
-          )
-        else ...[
+          ),
+          const SizedBox(height: AppSpacing.s),
+          TextButton(
+            onPressed: () {
+              setState(() {
+                _isRegistering = !_isRegistering;
+              });
+            },
+            child: Text(
+              _isRegistering
+                  ? 'पहले से ही खाता है? लॉगिन करें (Have an account? Login)'
+                  : 'नया खाता बनाएँ (Don\'t have an account? Register)',
+            ),
+          ),
+        ] else ...[
           Text(
             'हमने आपके नंबर पर ओटीपी भेजा है। (We sent an OTP to your phone.)',
             textAlign: TextAlign.center,
-            style: Theme.of(
-              context,
-            ).textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: AppColors.textSecondary,
+            ),
           ),
           const SizedBox(height: AppSpacing.m),
           OtpInput(

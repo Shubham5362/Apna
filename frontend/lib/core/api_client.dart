@@ -45,6 +45,34 @@ class ApiClient {
     }
   }
 
+  // --- Auth APIs ---
+  Future<Map<String, dynamic>> register(
+    String phoneNumber,
+    String? fullName,
+  ) async {
+    final response = await dio.post(
+      '/api/v1/auth/register',
+      data: {'phone_number': phoneNumber, 'full_name': fullName},
+    );
+    return response.data as Map<String, dynamic>;
+  }
+
+  Future<Map<String, dynamic>> loginInit(String phoneNumber) async {
+    final response = await dio.post(
+      '/api/v1/auth/login-init',
+      data: {'phone_number': phoneNumber},
+    );
+    return response.data as Map<String, dynamic>;
+  }
+
+  Future<Map<String, dynamic>> verifyOtp(String phoneNumber, String otp) async {
+    final response = await dio.post(
+      '/api/v1/auth/verify-otp',
+      data: {'phone_number': phoneNumber, 'otp': otp},
+    );
+    return response.data as Map<String, dynamic>;
+  }
+
   // --- Profile APIs ---
   Future<Map<String, dynamic>> getProfile() async {
     final response = await dio.get('/api/v1/profile');
