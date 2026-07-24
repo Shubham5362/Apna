@@ -4,7 +4,7 @@ import 'api_client.dart';
 final apiClientProvider = Provider<ApiClient>((ref) {
   const String backendUrl = String.fromEnvironment(
     'BACKEND_URL',
-    defaultValue: 'http://localhost:8000',
+    defaultValue: 'https://apna-mandla-backend.onrender.com',
   );
   final client = ApiClient(baseUrl: backendUrl);
   final token = ref.watch(authTokenProvider);

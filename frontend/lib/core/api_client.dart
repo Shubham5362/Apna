@@ -7,7 +7,7 @@ class ApiClient {
   ApiClient({String? baseUrl})
     : dio = Dio(
         BaseOptions(
-          baseUrl: baseUrl ?? 'http://localhost:8000',
+          baseUrl: baseUrl ?? 'https://apna-mandla-backend.onrender.com',
           connectTimeout: const Duration(seconds: 10),
           receiveTimeout: const Duration(seconds: 10),
           headers: {
