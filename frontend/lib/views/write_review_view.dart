@@ -123,80 +123,85 @@ class _WriteReviewViewState extends ConsumerState<WriteReviewView> {
           },
         ),
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                isEditing
-                    ? 'How would you rate it now?'
-                    : 'How would you rate this item?',
-                style: Theme.of(
-                  context,
-                ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 12),
-              Center(
-                child: StarRatingWidget(
-                  rating: _ratingValue.toDouble(),
-                  size: 40,
-                  onRatingChanged: (val) {
-                    setState(() => _ratingValue = val);
-                  },
-                ),
-              ),
-              const SizedBox(height: 24),
-              Text(
-                'Tell us more about your experience',
-                style: Theme.of(
-                  context,
-                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 12),
-              TextFormField(
-                controller: _commentController,
-                maxLines: 5,
-                decoration: InputDecoration(
-                  hintText: 'Describe what you liked or disliked...',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                ),
-                validator: (value) {
-                  if (value == null || value.trim().isEmpty) {
-                    return 'Please enter some feedback comment';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 32),
-              SizedBox(
-                width: double.infinity,
-                height: 50,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blue,
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
+      body: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 600),
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(16.0),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    isEditing
+                        ? 'How would you rate it now?'
+                        : 'How would you rate this item?',
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
-                  onPressed: opsState.isLoading ? null : _submitReview,
-                  child: opsState.isLoading
-                      ? const CircularProgressIndicator(color: Colors.white)
-                      : Text(
-                          isEditing ? 'Update Review' : 'Submit Review',
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
+                  const SizedBox(height: 12),
+                  Center(
+                    child: StarRatingWidget(
+                      rating: _ratingValue.toDouble(),
+                      size: 40,
+                      onRatingChanged: (val) {
+                        setState(() => _ratingValue = val);
+                      },
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  Text(
+                    'Tell us more about your experience',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  TextFormField(
+                    controller: _commentController,
+                    maxLines: 5,
+                    decoration: InputDecoration(
+                      hintText: 'Describe what you liked or disliked...',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    validator: (value) {
+                      if (value == null || value.trim().isEmpty) {
+                        return 'Please enter some feedback comment';
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 32),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 50,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.blue,
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
                         ),
-                ),
+                      ),
+                      onPressed: opsState.isLoading ? null : _submitReview,
+                      child: opsState.isLoading
+                          ? const CircularProgressIndicator(color: Colors.white)
+                          : Text(
+                              isEditing ? 'Update Review' : 'Submit Review',
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                    ),
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
         ),
       ),

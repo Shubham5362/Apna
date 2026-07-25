@@ -27,4 +27,11 @@ flutter doctor -v
 # Run builds
 cd "$SCRIPT_DIR"
 flutter pub get
-flutter build web --release
+
+if [ -n "$BACKEND_URL" ]; then
+    echo "Building Flutter Web with BACKEND_URL=$BACKEND_URL..."
+    flutter build web --release --dart-define=BACKEND_URL="$BACKEND_URL"
+else
+    echo "Building Flutter Web with default BACKEND_URL..."
+    flutter build web --release
+fi

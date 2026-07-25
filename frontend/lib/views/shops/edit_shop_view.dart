@@ -90,88 +90,93 @@ class _EditShopViewState extends ConsumerState<EditShopView> {
             _initialized = true;
           }
 
-          return SingleChildScrollView(
-            padding: const EdgeInsets.all(16.0),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  TextFormField(
-                    controller: _nameController,
-                    decoration: InputDecoration(
-                      labelText: 'Shop Name',
-                      prefixIcon: const Icon(Icons.storefront),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
+          return Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 600),
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(16.0),
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      TextFormField(
+                        controller: _nameController,
+                        decoration: InputDecoration(
+                          labelText: 'Shop Name',
+                          prefixIcon: const Icon(Icons.storefront),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                        validator: (value) {
+                          if (value == null || value.trim().isEmpty) {
+                            return 'Shop name is required';
+                          }
+                          return null;
+                        },
                       ),
-                    ),
-                    validator: (value) {
-                      if (value == null || value.trim().isEmpty) {
-                        return 'Shop name is required';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 16),
-                  TextFormField(
-                    controller: _descController,
-                    maxLines: 4,
-                    decoration: InputDecoration(
-                      labelText: 'Shop Description',
-                      prefixIcon: const Icon(Icons.description_outlined),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  SwitchListTile(
-                    title: const Text('Is Shop Active?'),
-                    subtitle: const Text(
-                      'Inactive shops are hidden from the public.',
-                    ),
-                    value: _isActive,
-                    onChanged: (val) {
-                      setState(() {
-                        _isActive = val;
-                      });
-                    },
-                    secondary: const Icon(Icons.power_settings_new),
-                  ),
-                  const SizedBox(height: 32),
-                  SizedBox(
-                    width: double.infinity,
-                    height: 50,
-                    child: ElevatedButton.icon(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.blue,
-                        foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
+                      const SizedBox(height: 16),
+                      TextFormField(
+                        controller: _descController,
+                        maxLines: 4,
+                        decoration: InputDecoration(
+                          labelText: 'Shop Description',
+                          prefixIcon: const Icon(Icons.description_outlined),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
                         ),
                       ),
-                      onPressed: opsState.isLoading ? null : _submit,
-                      icon: opsState.isLoading
-                          ? const SizedBox(
-                              width: 20,
-                              height: 20,
-                              child: CircularProgressIndicator(
-                                color: Colors.white,
-                                strokeWidth: 2,
-                              ),
-                            )
-                          : const Icon(Icons.check),
-                      label: Text(
-                        opsState.isLoading ? 'Saving...' : 'Save Changes',
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
+                      const SizedBox(height: 16),
+                      SwitchListTile(
+                        title: const Text('Is Shop Active?'),
+                        subtitle: const Text(
+                          'Inactive shops are hidden from the public.',
+                        ),
+                        value: _isActive,
+                        onChanged: (val) {
+                          setState(() {
+                            _isActive = val;
+                          });
+                        },
+                        secondary: const Icon(Icons.power_settings_new),
+                      ),
+                      const SizedBox(height: 32),
+                      SizedBox(
+                        width: double.infinity,
+                        height: 50,
+                        child: ElevatedButton.icon(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.blue,
+                            foregroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                          onPressed: opsState.isLoading ? null : _submit,
+                          icon: opsState.isLoading
+                              ? const SizedBox(
+                                  width: 20,
+                                  height: 20,
+                                  child: CircularProgressIndicator(
+                                    color: Colors.white,
+                                    strokeWidth: 2,
+                                  ),
+                                )
+                              : const Icon(Icons.check),
+                          label: Text(
+                            opsState.isLoading ? 'Saving...' : 'Save Changes',
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                         ),
                       ),
-                    ),
+                    ],
                   ),
-                ],
+                ),
               ),
             ),
           );

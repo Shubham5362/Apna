@@ -200,290 +200,305 @@ class _UserProfileViewState extends ConsumerState<UserProfileView> {
       ),
       body: profileState.isLoading && profile == null
           ? const Center(child: CircularProgressIndicator())
-          : SingleChildScrollView(
-              padding: const EdgeInsets.all(16.0),
-              child: Form(
-                key: _formKey,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    // Avatar & Upload button
-                    Stack(
-                      alignment: Alignment.bottomRight,
+          : Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 600),
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Form(
+                    key: _formKey,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        CircleAvatar(
-                          radius: 60,
-                          backgroundColor: Colors.blue.shade100,
-                          backgroundImage: fullPhotoUrl != null
-                              ? NetworkImage(fullPhotoUrl)
-                              : null,
-                          child: fullPhotoUrl == null
-                              ? const Icon(
-                                  Icons.person,
-                                  size: 60,
-                                  color: Colors.blue,
-                                )
-                              : null,
-                        ),
-                        CircleAvatar(
-                          backgroundColor: Colors.blue,
-                          radius: 18,
-                          child: IconButton(
-                            icon: const Icon(
-                              Icons.camera_alt,
-                              size: 16,
-                              color: Colors.white,
-                            ),
-                            onPressed: _uploadMockPhoto,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-
-                    // Completion percentage
-                    Card(
-                      elevation: 0,
-                      color: Colors.blue.shade50,
-                      child: Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Column(
+                        // Avatar & Upload button
+                        Stack(
+                          alignment: Alignment.bottomRight,
                           children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  'Profile Completion',
-                                  style: Theme.of(context).textTheme.titleMedium
-                                      ?.copyWith(
-                                        color: Colors.blue.shade900,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                ),
-                                Text(
-                                  '$completionPercent%',
-                                  style: Theme.of(context).textTheme.titleMedium
-                                      ?.copyWith(
-                                        color: Colors.blue.shade900,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 8),
-                            LinearProgressIndicator(
-                              value: completionPercent / 100.0,
+                            CircleAvatar(
+                              radius: 60,
                               backgroundColor: Colors.blue.shade100,
-                              color: Colors.blue,
-                              minHeight: 8,
-                              borderRadius: BorderRadius.circular(4),
+                              backgroundImage: fullPhotoUrl != null
+                                  ? NetworkImage(fullPhotoUrl)
+                                  : null,
+                              child: fullPhotoUrl == null
+                                  ? const Icon(
+                                      Icons.person,
+                                      size: 60,
+                                      color: Colors.blue,
+                                    )
+                                  : null,
+                            ),
+                            CircleAvatar(
+                              backgroundColor: Colors.blue,
+                              radius: 18,
+                              child: IconButton(
+                                icon: const Icon(
+                                  Icons.camera_alt,
+                                  size: 16,
+                                  color: Colors.white,
+                                ),
+                                onPressed: _uploadMockPhoto,
+                              ),
                             ),
                           ],
                         ),
-                      ),
-                    ),
-                    const SizedBox(height: 24),
+                        const SizedBox(height: 16),
 
-                    // Fields
-                    _buildTextField(
-                      controller: _fullNameController,
-                      label: 'Full Name',
-                      icon: Icons.person,
-                      validator: (value) {
-                        if (value == null || value.trim().isEmpty) {
-                          return 'Full name is required';
-                        }
-                        return null;
-                      },
-                    ),
-                    const SizedBox(height: 16),
-
-                    _buildTextField(
-                      controller: _emailController,
-                      label: 'Email (Optional)',
-                      icon: Icons.email,
-                      keyboardType: TextInputType.emailAddress,
-                      validator: (value) {
-                        if (value != null && value.trim().isNotEmpty) {
-                          final emailRegExp = RegExp(
-                            r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
-                          );
-                          if (!emailRegExp.hasMatch(value.trim())) {
-                            return 'Enter a valid email address';
-                          }
-                        }
-                        return null;
-                      },
-                    ),
-                    const SizedBox(height: 16),
-
-                    Row(
-                      children: [
-                        Expanded(
-                          child: _buildTextField(
-                            controller: _genderController,
-                            label: 'Gender',
-                            icon: Icons.wc,
-                          ),
-                        ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: _buildTextField(
-                            controller: _dobController,
-                            label: 'Date of Birth (YYYY-MM-DD)',
-                            icon: Icons.calendar_today,
-                            keyboardType: TextInputType.datetime,
-                            validator: (value) {
-                              if (value != null && value.trim().isNotEmpty) {
-                                final dateRegExp = RegExp(
-                                  r'^\d{4}-\d{2}-\d{2}$',
-                                );
-                                if (!dateRegExp.hasMatch(value.trim())) {
-                                  return 'Use YYYY-MM-DD format';
-                                }
-                              }
-                              return null;
-                            },
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-
-                    _buildTextField(
-                      controller: _addressController,
-                      label: 'Address',
-                      icon: Icons.home,
-                    ),
-                    const SizedBox(height: 16),
-
-                    Row(
-                      children: [
-                        Expanded(
-                          child: _buildTextField(
-                            controller: _cityController,
-                            label: 'City',
-                            icon: Icons.location_city,
-                          ),
-                        ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: _buildTextField(
-                            controller: _stateController,
-                            label: 'State',
-                            icon: Icons.map,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-
-                    Row(
-                      children: [
-                        Expanded(
-                          child: _buildTextField(
-                            controller: _pincodeController,
-                            label: 'Pincode',
-                            icon: Icons.pin_drop,
-                            keyboardType: TextInputType.number,
-                          ),
-                        ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: _buildTextField(
-                            controller: _countryController,
-                            label: 'Country',
-                            icon: Icons.public,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-
-                    Row(
-                      children: [
-                        Expanded(
-                          child: _buildTextField(
-                            controller: _languageController,
-                            label: 'Language',
-                            icon: Icons.language,
-                          ),
-                        ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: _buildTextField(
-                            controller: _timezoneController,
-                            label: 'Timezone',
-                            icon: Icons.access_time,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 24),
-
-                    // Save Button
-                    SizedBox(
-                      width: double.infinity,
-                      height: 50,
-                      child: ElevatedButton.icon(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.blue,
-                          foregroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                        ),
-                        onPressed: profileState.isLoading ? null : _saveProfile,
-                        icon: profileState.isLoading
-                            ? const SizedBox(
-                                width: 20,
-                                height: 20,
-                                child: CircularProgressIndicator(
-                                  color: Colors.white,
-                                  strokeWidth: 2,
+                        // Completion percentage
+                        Card(
+                          elevation: 0,
+                          color: Colors.blue.shade50,
+                          child: Padding(
+                            padding: const EdgeInsets.all(16.0),
+                            child: Column(
+                              children: [
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      'Profile Completion',
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .titleMedium
+                                          ?.copyWith(
+                                            color: Colors.blue.shade900,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                    ),
+                                    Text(
+                                      '$completionPercent%',
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .titleMedium
+                                          ?.copyWith(
+                                            color: Colors.blue.shade900,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                    ),
+                                  ],
                                 ),
-                              )
-                            : const Icon(Icons.save),
-                        label: Text(
-                          profileState.isLoading ? 'Saving...' : 'Save Profile',
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
+                                const SizedBox(height: 8),
+                                LinearProgressIndicator(
+                                  value: completionPercent / 100.0,
+                                  backgroundColor: Colors.blue.shade100,
+                                  color: Colors.blue,
+                                  minHeight: 8,
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
+                        const SizedBox(height: 24),
 
-                    // Payment History Button
-                    SizedBox(
-                      width: double.infinity,
-                      height: 50,
-                      child: OutlinedButton.icon(
-                        style: OutlinedButton.styleFrom(
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
+                        // Fields
+                        _buildTextField(
+                          controller: _fullNameController,
+                          label: 'Full Name',
+                          icon: Icons.person,
+                          validator: (value) {
+                            if (value == null || value.trim().isEmpty) {
+                              return 'Full name is required';
+                            }
+                            return null;
+                          },
+                        ),
+                        const SizedBox(height: 16),
+
+                        _buildTextField(
+                          controller: _emailController,
+                          label: 'Email (Optional)',
+                          icon: Icons.email,
+                          keyboardType: TextInputType.emailAddress,
+                          validator: (value) {
+                            if (value != null && value.trim().isNotEmpty) {
+                              final emailRegExp = RegExp(
+                                r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
+                              );
+                              if (!emailRegExp.hasMatch(value.trim())) {
+                                return 'Enter a valid email address';
+                              }
+                            }
+                            return null;
+                          },
+                        ),
+                        const SizedBox(height: 16),
+
+                        Row(
+                          children: [
+                            Expanded(
+                              child: _buildTextField(
+                                controller: _genderController,
+                                label: 'Gender',
+                                icon: Icons.wc,
+                              ),
+                            ),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: _buildTextField(
+                                controller: _dobController,
+                                label: 'Date of Birth (YYYY-MM-DD)',
+                                icon: Icons.calendar_today,
+                                keyboardType: TextInputType.datetime,
+                                validator: (value) {
+                                  if (value != null &&
+                                      value.trim().isNotEmpty) {
+                                    final dateRegExp = RegExp(
+                                      r'^\d{4}-\d{2}-\d{2}$',
+                                    );
+                                    if (!dateRegExp.hasMatch(value.trim())) {
+                                      return 'Use YYYY-MM-DD format';
+                                    }
+                                  }
+                                  return null;
+                                },
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 16),
+
+                        _buildTextField(
+                          controller: _addressController,
+                          label: 'Address',
+                          icon: Icons.home,
+                        ),
+                        const SizedBox(height: 16),
+
+                        Row(
+                          children: [
+                            Expanded(
+                              child: _buildTextField(
+                                controller: _cityController,
+                                label: 'City',
+                                icon: Icons.location_city,
+                              ),
+                            ),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: _buildTextField(
+                                controller: _stateController,
+                                label: 'State',
+                                icon: Icons.map,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 16),
+
+                        Row(
+                          children: [
+                            Expanded(
+                              child: _buildTextField(
+                                controller: _pincodeController,
+                                label: 'Pincode',
+                                icon: Icons.pin_drop,
+                                keyboardType: TextInputType.number,
+                              ),
+                            ),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: _buildTextField(
+                                controller: _countryController,
+                                label: 'Country',
+                                icon: Icons.public,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 16),
+
+                        Row(
+                          children: [
+                            Expanded(
+                              child: _buildTextField(
+                                controller: _languageController,
+                                label: 'Language',
+                                icon: Icons.language,
+                              ),
+                            ),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: _buildTextField(
+                                controller: _timezoneController,
+                                label: 'Timezone',
+                                icon: Icons.access_time,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 24),
+
+                        // Save Button
+                        SizedBox(
+                          width: double.infinity,
+                          height: 50,
+                          child: ElevatedButton.icon(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.blue,
+                              foregroundColor: Colors.white,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                            ),
+                            onPressed: profileState.isLoading
+                                ? null
+                                : _saveProfile,
+                            icon: profileState.isLoading
+                                ? const SizedBox(
+                                    width: 20,
+                                    height: 20,
+                                    child: CircularProgressIndicator(
+                                      color: Colors.white,
+                                      strokeWidth: 2,
+                                    ),
+                                  )
+                                : const Icon(Icons.save),
+                            label: Text(
+                              profileState.isLoading
+                                  ? 'Saving...'
+                                  : 'Save Profile',
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
                           ),
                         ),
-                        onPressed: () => context.go('/payments/history'),
-                        icon: const Icon(Icons.history),
-                        label: const Text(
-                          'View Payment History',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
+                        const SizedBox(height: 16),
+
+                        // Payment History Button
+                        SizedBox(
+                          width: double.infinity,
+                          height: 50,
+                          child: OutlinedButton.icon(
+                            style: OutlinedButton.styleFrom(
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                            ),
+                            onPressed: () => context.go('/payments/history'),
+                            icon: const Icon(Icons.history),
+                            label: const Text(
+                              'View Payment History',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
                           ),
                         ),
-                      ),
+                        const SizedBox(height: 16),
+                        if (profileState.error != null)
+                          Text(
+                            profileState.error!,
+                            style: const TextStyle(color: Colors.red),
+                            textAlign: TextAlign.center,
+                          ),
+                      ],
                     ),
-                    const SizedBox(height: 16),
-                    if (profileState.error != null)
-                      Text(
-                        profileState.error!,
-                        style: const TextStyle(color: Colors.red),
-                        textAlign: TextAlign.center,
-                      ),
-                  ],
+                  ),
                 ),
               ),
             ),
