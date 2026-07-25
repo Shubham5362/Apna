@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/providers.dart';
+import '../../core/theme.dart';
 
 class ProductListView extends ConsumerWidget {
   const ProductListView({super.key});
@@ -202,10 +203,17 @@ class ProductListView extends ConsumerWidget {
                   );
                 }
 
+                final crossAxisCount = ResponsiveLayout.getResponsiveValue(
+                  context: context,
+                  mobile: 2.0,
+                  tablet: 3.0,
+                  desktop: 5.0,
+                ).toInt();
+
                 return GridView.builder(
                   padding: const EdgeInsets.all(16),
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: crossAxisCount,
                     childAspectRatio: 0.70,
                     crossAxisSpacing: 16,
                     mainAxisSpacing: 16,
