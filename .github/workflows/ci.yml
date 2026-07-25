@@ -112,6 +112,25 @@ jobs:
           cd frontend
           flutter build web --release --dart-define=BACKEND_URL=https://apna-mandla-backend.onrender.com
 
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Python dependencies for smoke test
+        run: |
+          python -m pip install --upgrade pip
+          pip install playwright
+          playwright install --with-deps chromium
+
+      - name: Run Flutter Web Smoke Test
+        run: |
+          cd frontend/build/web
+          python3 -m http.server 3000 &
+          cd ../../..
+          sleep 3
+          python verify_frontend.py
+
   build-android-release:
     runs-on: ubuntu-latest
     needs: [frontend-test]
