@@ -69,6 +69,8 @@ jobs:
           PYTHONPATH=. pytest
 
   frontend-test:
+    # Trigger automated checks on every Pull Request (Requirement 8)
+    # Runs: flutter pub get, flutter analyze, flutter test, flutter build web
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
