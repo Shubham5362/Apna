@@ -33,7 +33,7 @@ void main() {
     expect(find.text('Profile'), findsOneWidget);
 
     // Verify initial screen displays products list
-    expect(find.text('Marketplace Products'), findsOneWidget);
+    expect(find.text('Apna Mandla Digital Market'), findsOneWidget);
     expect(find.text('Apple Organic'), findsOneWidget);
 
     // Tap on the Shops tab

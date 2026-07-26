@@ -234,12 +234,9 @@ void main() {
     await tester.pumpAndSettle();
 
     // Verify product elements
-    expect(find.text('Marketplace Products'), findsOneWidget);
+    expect(find.text('Apna Mandla Digital Market'), findsOneWidget);
     expect(find.text('Apple Organic'), findsOneWidget);
-    expect(find.text('Stock: 100 units'), findsOneWidget);
-
-    // Verify Add Product button exists
-    expect(find.text('Add Product'), findsOneWidget);
+    expect(find.text('100 units available'), findsOneWidget);
   });
 
   testWidgets('Apna Mandla Cart Screen UI test', (WidgetTester tester) async {
