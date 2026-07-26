@@ -341,7 +341,7 @@ class _LoginViewState extends ConsumerState<LoginView>
               message:
                   'अपना मांडला में आपका स्वागत है! (Welcome to Apna Mandla!)',
               onButtonPressed: () {
-                context.go('/');
+                context.go('/dashboard');
               },
             ),
           );
