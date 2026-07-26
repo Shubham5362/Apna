@@ -23,7 +23,9 @@ class _ProductDetailsViewState extends ConsumerState<ProductDetailsView> {
     });
 
     try {
-      final success = await ref.read(cartProvider.notifier).addToCart(widget.productId, _quantity);
+      final success = await ref
+          .read(cartProvider.notifier)
+          .addToCart(widget.productId, _quantity);
       if (mounted) {
         if (success) {
           if (navigateToCheckout) {
@@ -31,18 +33,18 @@ class _ProductDetailsViewState extends ConsumerState<ProductDetailsView> {
           } else {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
-                content: Text('Added to cart successfully! (कार्ट में जोड़ा गया!)'),
+                content: Text(
+                  'Added to cart successfully! (कार्ट में जोड़ा गया!)',
+                ),
                 backgroundColor: Colors.green,
               ),
             );
           }
         } else {
-          final error = ref.read(cartProvider).error ?? 'Failed to add item to cart';
+          final error =
+              ref.read(cartProvider).error ?? 'Failed to add item to cart';
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(error),
-              backgroundColor: Colors.red,
-            ),
+            SnackBar(content: Text(error), backgroundColor: Colors.red),
           );
         }
       }
@@ -104,17 +106,23 @@ class _ProductDetailsViewState extends ConsumerState<ProductDetailsView> {
                       return Container(
                         width: double.infinity,
                         margin: const EdgeInsets.symmetric(horizontal: 4),
-                        decoration: BoxDecoration(
-                          color: Colors.orange.shade50,
-                        ),
+                        decoration: BoxDecoration(color: Colors.orange.shade50),
                         child: img != null
                             ? Image.network(
                                 img,
                                 fit: BoxFit.cover,
                                 errorBuilder: (context, error, stackTrace) =>
-                                    Icon(Icons.shopping_bag, size: 80, color: Colors.orange.shade300),
+                                    Icon(
+                                      Icons.shopping_bag,
+                                      size: 80,
+                                      color: Colors.orange.shade300,
+                                    ),
                               )
-                            : Icon(Icons.shopping_bag_outlined, size: 80, color: Colors.orange.shade300),
+                            : Icon(
+                                Icons.shopping_bag_outlined,
+                                size: 80,
+                                color: Colors.orange.shade300,
+                              ),
                       );
                     },
                   ),
@@ -141,7 +149,8 @@ class _ProductDetailsViewState extends ConsumerState<ProductDetailsView> {
                             children: [
                               Text(
                                 '\$$price',
-                                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                                style: Theme.of(context).textTheme.headlineSmall
+                                    ?.copyWith(
                                       color: Colors.green,
                                       fontWeight: FontWeight.bold,
                                     ),
@@ -176,10 +185,16 @@ class _ProductDetailsViewState extends ConsumerState<ProductDetailsView> {
                           ),
                           const SizedBox(width: 8),
                           Chip(
-                            label: Text(stock > 0 ? 'IN STOCK' : 'OUT OF STOCK'),
-                            backgroundColor: stock > 0 ? Colors.green.shade100 : Colors.red.shade100,
+                            label: Text(
+                              stock > 0 ? 'IN STOCK' : 'OUT OF STOCK',
+                            ),
+                            backgroundColor: stock > 0
+                                ? Colors.green.shade100
+                                : Colors.red.shade100,
                             labelStyle: TextStyle(
-                              color: stock > 0 ? Colors.green.shade800 : Colors.red.shade800,
+                              color: stock > 0
+                                  ? Colors.green.shade800
+                                  : Colors.red.shade800,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
@@ -191,7 +206,10 @@ class _ProductDetailsViewState extends ConsumerState<ProductDetailsView> {
                       if (stock > 0) ...[
                         const Text(
                           'Select Quantity',
-                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                         const SizedBox(height: 8),
                         Row(
@@ -211,7 +229,10 @@ class _ProductDetailsViewState extends ConsumerState<ProductDetailsView> {
                                   ),
                                   Text(
                                     '$_quantity',
-                                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                                    style: const TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                    ),
                                   ),
                                   IconButton(
                                     icon: const Icon(Icons.add),
@@ -225,7 +246,10 @@ class _ProductDetailsViewState extends ConsumerState<ProductDetailsView> {
                             const Spacer(),
                             Text(
                               'Only $stock units left!',
-                              style: const TextStyle(color: Colors.red, fontWeight: FontWeight.w500),
+                              style: const TextStyle(
+                                color: Colors.red,
+                                fontWeight: FontWeight.w500,
+                              ),
                             ),
                           ],
                         ),
@@ -239,18 +263,33 @@ class _ProductDetailsViewState extends ConsumerState<ProductDetailsView> {
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: Colors.blue,
                                   foregroundColor: Colors.white,
-                                  padding: const EdgeInsets.symmetric(vertical: 14),
-                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 14,
+                                  ),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
                                 ),
-                                onPressed: _isAddingToCart ? null : () => _handleAddToCart(),
+                                onPressed: _isAddingToCart
+                                    ? null
+                                    : () => _handleAddToCart(),
                                 icon: _isAddingToCart
                                     ? const SizedBox(
                                         width: 20,
                                         height: 20,
-                                        child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                                        child: CircularProgressIndicator(
+                                          color: Colors.white,
+                                          strokeWidth: 2,
+                                        ),
                                       )
                                     : const Icon(Icons.add_shopping_cart),
-                                label: const Text('Add to Cart', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                                label: const Text(
+                                  'Add to Cart',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
                               ),
                             ),
                             const SizedBox(width: 16),
@@ -259,12 +298,26 @@ class _ProductDetailsViewState extends ConsumerState<ProductDetailsView> {
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: Colors.orange.shade800,
                                   foregroundColor: Colors.white,
-                                  padding: const EdgeInsets.symmetric(vertical: 14),
-                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 14,
+                                  ),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
                                 ),
-                                onPressed: _isAddingToCart ? null : () => _handleAddToCart(navigateToCheckout: true),
+                                onPressed: _isAddingToCart
+                                    ? null
+                                    : () => _handleAddToCart(
+                                        navigateToCheckout: true,
+                                      ),
                                 icon: const Icon(Icons.flash_on),
-                                label: const Text('Buy Now', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                                label: const Text(
+                                  'Buy Now',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
                               ),
                             ),
                           ],
@@ -272,7 +325,11 @@ class _ProductDetailsViewState extends ConsumerState<ProductDetailsView> {
                       ] else ...[
                         const Text(
                           'This item is currently out of stock. Please check back later.',
-                          style: TextStyle(color: Colors.red, fontSize: 16, fontWeight: FontWeight.w500),
+                          style: TextStyle(
+                            color: Colors.red,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w500,
+                          ),
                         ),
                       ],
 
@@ -281,7 +338,10 @@ class _ProductDetailsViewState extends ConsumerState<ProductDetailsView> {
                       // 3. PRODUCT DESCRIPTION
                       const Text(
                         'Description',
-                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                       const SizedBox(height: 8),
                       Text(desc, style: Theme.of(context).textTheme.bodyLarge),
@@ -291,7 +351,10 @@ class _ProductDetailsViewState extends ConsumerState<ProductDetailsView> {
                       // 4. SPECIFICATIONS SECTION
                       const Text(
                         'Product Specifications',
-                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                       const SizedBox(height: 12),
                       Container(
@@ -303,9 +366,15 @@ class _ProductDetailsViewState extends ConsumerState<ProductDetailsView> {
                         ),
                         child: Column(
                           children: [
-                            _buildSpecRow('Origin', 'Mandla Local Organic Farms'),
+                            _buildSpecRow(
+                              'Origin',
+                              'Mandla Local Organic Farms',
+                            ),
                             const Divider(),
-                            _buildSpecRow('Packaging', 'Eco-friendly biodegradable bag'),
+                            _buildSpecRow(
+                              'Packaging',
+                              'Eco-friendly biodegradable bag',
+                            ),
                             const Divider(),
                             _buildSpecRow('Shelf Life', '3 to 5 Days'),
                             const Divider(),
@@ -319,17 +388,27 @@ class _ProductDetailsViewState extends ConsumerState<ProductDetailsView> {
                       // 5. SELLER INFORMATION CARD
                       const Text(
                         'Seller Information',
-                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                       const SizedBox(height: 12),
                       if (shopId != null)
-                        ref.watch(shopDetailsProvider(shopId)).when(
+                        ref
+                            .watch(shopDetailsProvider(shopId))
+                            .when(
                               data: (shop) {
-                                final shopName = shop['name'] ?? 'Local Mandla Shop';
-                                final shopDesc = shop['description'] ?? 'No description available.';
+                                final shopName =
+                                    shop['name'] ?? 'Local Mandla Shop';
+                                final shopDesc =
+                                    shop['description'] ??
+                                    'No description available.';
                                 return Card(
                                   elevation: 2,
-                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
                                   child: Padding(
                                     padding: const EdgeInsets.all(16.0),
                                     child: Row(
@@ -337,28 +416,42 @@ class _ProductDetailsViewState extends ConsumerState<ProductDetailsView> {
                                         const CircleAvatar(
                                           radius: 28,
                                           backgroundColor: Colors.blueAccent,
-                                          child: Icon(Icons.store, color: Colors.white, size: 28),
+                                          child: Icon(
+                                            Icons.store,
+                                            color: Colors.white,
+                                            size: 28,
+                                          ),
                                         ),
                                         const SizedBox(width: 16),
                                         Expanded(
                                           child: Column(
-                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
                                             children: [
                                               Text(
                                                 shopName,
-                                                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                                                style: const TextStyle(
+                                                  fontSize: 16,
+                                                  fontWeight: FontWeight.bold,
+                                                ),
                                               ),
                                               const SizedBox(height: 4),
                                               Text(
                                                 shopDesc,
                                                 maxLines: 2,
                                                 overflow: TextOverflow.ellipsis,
-                                                style: const TextStyle(fontSize: 12, color: Colors.grey),
-                                              )
+                                                style: const TextStyle(
+                                                  fontSize: 12,
+                                                  color: Colors.grey,
+                                                ),
+                                              ),
                                             ],
                                           ),
                                         ),
-                                        const Icon(Icons.verified, color: Colors.blue),
+                                        const Icon(
+                                          Icons.verified,
+                                          color: Colors.blue,
+                                        ),
                                       ],
                                     ),
                                   ),
@@ -377,7 +470,10 @@ class _ProductDetailsViewState extends ConsumerState<ProductDetailsView> {
                                 SizedBox(width: 16),
                                 Text(
                                   'Sold by Apna Mandla Direct Farm Collective',
-                                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w500,
+                                  ),
                                 ),
                               ],
                             ),
@@ -392,7 +488,8 @@ class _ProductDetailsViewState extends ConsumerState<ProductDetailsView> {
                         children: [
                           Text(
                             'Ratings & Reviews',
-                            style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                            style: Theme.of(context).textTheme.titleLarge
+                                ?.copyWith(fontWeight: FontWeight.bold),
                           ),
                           ElevatedButton.icon(
                             style: ElevatedButton.styleFrom(
@@ -410,11 +507,18 @@ class _ProductDetailsViewState extends ConsumerState<ProductDetailsView> {
                       const SizedBox(height: 16),
 
                       // Rating Summary Card
-                      ref.watch(productRatingSummaryProvider(widget.productId)).when(
+                      ref
+                          .watch(productRatingSummaryProvider(widget.productId))
+                          .when(
                             data: (summary) {
-                              final avg = summary['average_rating'] as double? ?? 0.0;
-                              final total = summary['total_ratings'] as int? ?? 0;
-                              final starCountsRaw = summary['star_counts'] as Map<String, dynamic>? ?? {};
+                              final avg =
+                                  summary['average_rating'] as double? ?? 0.0;
+                              final total =
+                                  summary['total_ratings'] as int? ?? 0;
+                              final starCountsRaw =
+                                  summary['star_counts']
+                                      as Map<String, dynamic>? ??
+                                  {};
                               final Map<int, int> starCounts = {};
                               starCountsRaw.forEach((k, v) {
                                 starCounts[int.parse(k)] = v as int;
@@ -435,12 +539,16 @@ class _ProductDetailsViewState extends ConsumerState<ProductDetailsView> {
                       const SizedBox(height: 24),
 
                       // Reviews List
-                      ref.watch(productReviewsProvider(widget.productId)).when(
+                      ref
+                          .watch(productReviewsProvider(widget.productId))
+                          .when(
                             data: (reviews) {
                               if (reviews.isEmpty) {
                                 return const Center(
                                   child: Padding(
-                                    padding: EdgeInsets.symmetric(vertical: 24.0),
+                                    padding: EdgeInsets.symmetric(
+                                      vertical: 24.0,
+                                    ),
                                     child: Text(
                                       'No reviews yet. Be the first to review!',
                                       style: TextStyle(color: Colors.grey),
@@ -454,28 +562,36 @@ class _ProductDetailsViewState extends ConsumerState<ProductDetailsView> {
                                 physics: const NeverScrollableScrollPhysics(),
                                 itemCount: reviews.length,
                                 itemBuilder: (context, index) {
-                                  final r = reviews[index] as Map<String, dynamic>;
+                                  final r =
+                                      reviews[index] as Map<String, dynamic>;
                                   final reviewId = r['id'] as int;
                                   final comment = r['comment'] as String;
                                   final ratingVal = r['rating_value'] as int;
-                                  final userName = r['user_name'] ?? 'Anonymous';
+                                  final userName =
+                                      r['user_name'] ?? 'Anonymous';
                                   final reviewUserId = r['user_id'] as int?;
 
-                                  final isMyReview = currentUserId != null && currentUserId == reviewUserId;
+                                  final isMyReview =
+                                      currentUserId != null &&
+                                      currentUserId == reviewUserId;
 
                                   return Card(
                                     margin: const EdgeInsets.only(bottom: 12),
                                     child: Padding(
                                       padding: const EdgeInsets.all(12.0),
                                       child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
                                         children: [
                                           Row(
-                                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.spaceBetween,
                                             children: [
                                               Text(
                                                 userName,
-                                                style: const TextStyle(fontWeight: FontWeight.bold),
+                                                style: const TextStyle(
+                                                  fontWeight: FontWeight.bold,
+                                                ),
                                               ),
                                               StarRatingWidget(
                                                 rating: ratingVal.toDouble(),
@@ -488,24 +604,43 @@ class _ProductDetailsViewState extends ConsumerState<ProductDetailsView> {
                                           if (isMyReview) ...[
                                             const Divider(height: 16),
                                             Row(
-                                              mainAxisAlignment: MainAxisAlignment.end,
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.end,
                                               children: [
                                                 TextButton.icon(
-                                                  style: TextButton.styleFrom(foregroundColor: Colors.orange),
+                                                  style: TextButton.styleFrom(
+                                                    foregroundColor:
+                                                        Colors.orange,
+                                                  ),
                                                   onPressed: () => context.go(
                                                     '/review/edit?reviewId=$reviewId&productId=${widget.productId}&ratingValue=$ratingVal&comment=${Uri.encodeComponent(comment)}',
                                                   ),
-                                                  icon: const Icon(Icons.edit, size: 16),
+                                                  icon: const Icon(
+                                                    Icons.edit,
+                                                    size: 16,
+                                                  ),
                                                   label: const Text('Edit'),
                                                 ),
                                                 TextButton.icon(
-                                                  style: TextButton.styleFrom(foregroundColor: Colors.red),
+                                                  style: TextButton.styleFrom(
+                                                    foregroundColor: Colors.red,
+                                                  ),
                                                   onPressed: () async {
                                                     await ref
-                                                        .read(reviewOpsProvider.notifier)
-                                                        .deleteReview(reviewId, productId: widget.productId);
+                                                        .read(
+                                                          reviewOpsProvider
+                                                              .notifier,
+                                                        )
+                                                        .deleteReview(
+                                                          reviewId,
+                                                          productId:
+                                                              widget.productId,
+                                                        );
                                                   },
-                                                  icon: const Icon(Icons.delete, size: 16),
+                                                  icon: const Icon(
+                                                    Icons.delete,
+                                                    size: 16,
+                                                  ),
                                                   label: const Text('Delete'),
                                                 ),
                                               ],
@@ -547,7 +682,13 @@ class _ProductDetailsViewState extends ConsumerState<ProductDetailsView> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label, style: const TextStyle(color: Colors.grey, fontWeight: FontWeight.w500)),
+          Text(
+            label,
+            style: const TextStyle(
+              color: Colors.grey,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
           Text(value, style: const TextStyle(fontWeight: FontWeight.bold)),
         ],
       ),

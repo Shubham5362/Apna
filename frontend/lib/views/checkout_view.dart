@@ -83,24 +83,37 @@ class _CheckoutViewState extends ConsumerState<CheckoutView> {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const Icon(Icons.check_circle_outline, size: 80, color: Colors.green),
+                          const Icon(
+                            Icons.check_circle_outline,
+                            size: 80,
+                            color: Colors.green,
+                          ),
                           const SizedBox(height: 24),
                           const Text(
                             'Order Successful!',
-                            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                            style: TextStyle(
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                           const SizedBox(height: 12),
                           Text(
                             'Your order #$id has been placed successfully using Cash on Delivery.',
                             textAlign: TextAlign.center,
-                            style: const TextStyle(fontSize: 16, color: Colors.grey),
+                            style: const TextStyle(
+                              fontSize: 16,
+                              color: Colors.grey,
+                            ),
                           ),
                           const SizedBox(height: 32),
                           ElevatedButton(
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.green,
                               foregroundColor: Colors.white,
-                              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 24,
+                                vertical: 12,
+                              ),
                             ),
                             onPressed: () => context.go('/dashboard'),
                             child: const Text('Back to Home'),
@@ -238,8 +251,13 @@ class _CheckoutViewState extends ConsumerState<CheckoutView> {
                       children: [
                         RadioListTile<String>(
                           title: const Text('Cash on Delivery (COD)'),
-                          subtitle: const Text('Pay when you receive your order'),
-                          secondary: const Icon(Icons.money, color: Colors.green),
+                          subtitle: const Text(
+                            'Pay when you receive your order',
+                          ),
+                          secondary: const Icon(
+                            Icons.money,
+                            color: Colors.green,
+                          ),
                           value: 'Cash on Delivery',
                           groupValue: _selectedPaymentMethod,
                           onChanged: (val) {
@@ -253,8 +271,13 @@ class _CheckoutViewState extends ConsumerState<CheckoutView> {
                         const Divider(height: 1),
                         RadioListTile<String>(
                           title: const Text('UPI / Digital Wallet / Cards'),
-                          subtitle: const Text('Fast and secure digital payment'),
-                          secondary: const Icon(Icons.credit_card, color: Colors.blue),
+                          subtitle: const Text(
+                            'Fast and secure digital payment',
+                          ),
+                          secondary: const Icon(
+                            Icons.credit_card,
+                            color: Colors.blue,
+                          ),
                           value: 'Digital Payment',
                           groupValue: _selectedPaymentMethod,
                           onChanged: (val) {
@@ -325,21 +348,36 @@ class _CheckoutViewState extends ConsumerState<CheckoutView> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text('Items Total:', style: TextStyle(color: Colors.grey, fontSize: 15)),
-                      Text('\$${totalPrice.toStringAsFixed(2)}', style: const TextStyle(fontSize: 15)),
+                      const Text(
+                        'Items Total:',
+                        style: TextStyle(color: Colors.grey, fontSize: 15),
+                      ),
+                      Text(
+                        '\$${totalPrice.toStringAsFixed(2)}',
+                        style: const TextStyle(fontSize: 15),
+                      ),
                     ],
                   ),
                   const SizedBox(height: 8),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text('Delivery Charges:', style: TextStyle(color: Colors.grey, fontSize: 15)),
+                      const Text(
+                        'Delivery Charges:',
+                        style: TextStyle(color: Colors.grey, fontSize: 15),
+                      ),
                       Text(
-                        deliveryCharges == 0.0 ? 'FREE' : '\$${deliveryCharges.toStringAsFixed(2)}',
+                        deliveryCharges == 0.0
+                            ? 'FREE'
+                            : '\$${deliveryCharges.toStringAsFixed(2)}',
                         style: TextStyle(
                           fontSize: 15,
-                          color: deliveryCharges == 0.0 ? Colors.green : Colors.black,
-                          fontWeight: deliveryCharges == 0.0 ? FontWeight.bold : FontWeight.normal,
+                          color: deliveryCharges == 0.0
+                              ? Colors.green
+                              : Colors.black,
+                          fontWeight: deliveryCharges == 0.0
+                              ? FontWeight.bold
+                              : FontWeight.normal,
                         ),
                       ),
                     ],
@@ -348,7 +386,11 @@ class _CheckoutViewState extends ConsumerState<CheckoutView> {
                     const SizedBox(height: 4),
                     Text(
                       'Tip: Add \$${(deliveryThreshold - totalPrice).toStringAsFixed(2)} more to get FREE Delivery!',
-                      style: TextStyle(color: Colors.orange.shade800, fontSize: 12, fontStyle: FontStyle.italic),
+                      style: TextStyle(
+                        color: Colors.orange.shade800,
+                        fontSize: 12,
+                        fontStyle: FontStyle.italic,
+                      ),
                     ),
                   ],
                   const Divider(height: 24),

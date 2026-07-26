@@ -19,7 +19,11 @@ class _ProductListViewState extends ConsumerState<ProductListView> {
 
   // Timer for Flash Sale countdown
   late Timer _countdownTimer;
-  Duration _flashSaleDuration = const Duration(hours: 3, minutes: 45, seconds: 0);
+  Duration _flashSaleDuration = const Duration(
+    hours: 3,
+    minutes: 45,
+    seconds: 0,
+  );
 
   // Promotional Banner Banners
   final List<Map<String, String>> _promoBanners = [
@@ -27,20 +31,20 @@ class _ProductListViewState extends ConsumerState<ProductListView> {
       'title': 'Apna Winter Market Fest!',
       'subtitle': 'Up to 30% off on fresh winter vegetables',
       'code': 'WINTER30',
-      'color': '0xFF1B5E20'
+      'color': '0xFF1B5E20',
     },
     {
       'title': 'Pure Organic Honey & Ghee',
       'subtitle': 'Direct from local farmers in Mandla',
       'code': 'LOCALLOVE',
-      'color': '0xFFE65100'
+      'color': '0xFFE65100',
     },
     {
       'title': 'Dairy Special Discounts',
       'subtitle': 'Fresh organic milk, paneer & butter',
       'code': 'FRESHDAIRY',
-      'color': '0xFF0D47A1'
-    }
+      'color': '0xFF0D47A1',
+    },
   ];
 
   final List<Map<String, dynamic>> _categories = [
@@ -70,9 +74,14 @@ class _ProductListViewState extends ConsumerState<ProductListView> {
       if (mounted) {
         setState(() {
           if (_flashSaleDuration.inSeconds > 0) {
-            _flashSaleDuration = _flashSaleDuration - const Duration(seconds: 1);
+            _flashSaleDuration =
+                _flashSaleDuration - const Duration(seconds: 1);
           } else {
-            _flashSaleDuration = const Duration(hours: 4, minutes: 0, seconds: 0);
+            _flashSaleDuration = const Duration(
+              hours: 4,
+              minutes: 0,
+              seconds: 0,
+            );
           }
         });
       }
@@ -138,7 +147,12 @@ class _ProductListViewState extends ConsumerState<ProductListView> {
                               icon: const Icon(Icons.clear),
                               onPressed: () {
                                 _searchController.clear();
-                                ref.read(productSearchQueryProvider.notifier).state = '';
+                                ref
+                                        .read(
+                                          productSearchQueryProvider.notifier,
+                                        )
+                                        .state =
+                                    '';
                                 setState(() {
                                   _showSuggestions = false;
                                 });
@@ -154,7 +168,8 @@ class _ProductListViewState extends ConsumerState<ProductListView> {
                       contentPadding: const EdgeInsets.symmetric(vertical: 0),
                     ),
                     onChanged: (value) {
-                      ref.read(productSearchQueryProvider.notifier).state = value;
+                      ref.read(productSearchQueryProvider.notifier).state =
+                          value;
                     },
                     onSubmitted: (value) {
                       final val = value.trim();
@@ -185,7 +200,7 @@ class _ProductListViewState extends ConsumerState<ProductListView> {
                             color: Colors.black.withOpacity(0.08),
                             blurRadius: 10,
                             offset: const Offset(0, 4),
-                          )
+                          ),
                         ],
                       ),
                       child: Column(
@@ -194,7 +209,11 @@ class _ProductListViewState extends ConsumerState<ProductListView> {
                           if (_recentSearches.isNotEmpty) ...[
                             const Text(
                               'Recent Searches',
-                              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Colors.grey),
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 13,
+                                color: Colors.grey,
+                              ),
                             ),
                             Wrap(
                               spacing: 8,
@@ -203,7 +222,13 @@ class _ProductListViewState extends ConsumerState<ProductListView> {
                                   label: Text(s),
                                   onPressed: () {
                                     _searchController.text = s;
-                                    ref.read(productSearchQueryProvider.notifier).state = s;
+                                    ref
+                                            .read(
+                                              productSearchQueryProvider
+                                                  .notifier,
+                                            )
+                                            .state =
+                                        s;
                                     setState(() {
                                       _showSuggestions = false;
                                     });
@@ -215,23 +240,40 @@ class _ProductListViewState extends ConsumerState<ProductListView> {
                           ],
                           const Text(
                             'Popular Suggestions',
-                            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Colors.grey),
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 13,
+                              color: Colors.grey,
+                            ),
                           ),
                           const SizedBox(height: 4),
                           Wrap(
                             spacing: 8,
-                            children: ['Fresh Apple', 'Organic Potato', 'Pure Milk', 'Desi Ghee', 'Wheat Grains'].map((s) {
-                              return ActionChip(
-                                label: Text(s),
-                                onPressed: () {
-                                  _searchController.text = s;
-                                  ref.read(productSearchQueryProvider.notifier).state = s;
-                                  setState(() {
-                                    _showSuggestions = false;
-                                  });
-                                },
-                              );
-                            }).toList(),
+                            children:
+                                [
+                                  'Fresh Apple',
+                                  'Organic Potato',
+                                  'Pure Milk',
+                                  'Desi Ghee',
+                                  'Wheat Grains',
+                                ].map((s) {
+                                  return ActionChip(
+                                    label: Text(s),
+                                    onPressed: () {
+                                      _searchController.text = s;
+                                      ref
+                                              .read(
+                                                productSearchQueryProvider
+                                                    .notifier,
+                                              )
+                                              .state =
+                                          s;
+                                      setState(() {
+                                        _showSuggestions = false;
+                                      });
+                                    },
+                                  );
+                                }).toList(),
                           ),
                         ],
                       ),
@@ -250,7 +292,10 @@ class _ProductListViewState extends ConsumerState<ProductListView> {
                   final banner = _promoBanners[index];
                   final colorVal = int.parse(banner['color']!);
                   return Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                    margin: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
                         colors: [
@@ -266,7 +311,7 @@ class _ProductListViewState extends ConsumerState<ProductListView> {
                           color: Color(colorVal).withOpacity(0.3),
                           blurRadius: 8,
                           offset: const Offset(0, 4),
-                        )
+                        ),
                       ],
                     ),
                     padding: const EdgeInsets.all(16),
@@ -296,7 +341,10 @@ class _ProductListViewState extends ConsumerState<ProductListView> {
                               ),
                               const SizedBox(height: 8),
                               Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 4,
+                                ),
                                 decoration: BoxDecoration(
                                   color: Colors.white.withOpacity(0.2),
                                   borderRadius: BorderRadius.circular(8),
@@ -309,7 +357,7 @@ class _ProductListViewState extends ConsumerState<ProductListView> {
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
-                              )
+                              ),
                             ],
                           ),
                         ),
@@ -317,7 +365,7 @@ class _ProductListViewState extends ConsumerState<ProductListView> {
                           Icons.local_offer,
                           color: Colors.white24,
                           size: 64,
-                        )
+                        ),
                       ],
                     ),
                   );
@@ -344,17 +392,22 @@ class _ProductListViewState extends ConsumerState<ProductListView> {
                   final name = cat['name'] as String;
                   final icon = cat['icon'] as IconData;
                   final color = cat['color'] as Color;
-                  final isSelected = (selectedCategory == name) || (selectedCategory == null && name == 'All');
+                  final isSelected =
+                      (selectedCategory == name) ||
+                      (selectedCategory == null && name == 'All');
 
                   return GestureDetector(
                     onTap: () {
-                      ref.read(productSelectedCategoryProvider.notifier).state = name == 'All' ? null : name;
+                      ref.read(productSelectedCategoryProvider.notifier).state =
+                          name == 'All' ? null : name;
                     },
                     child: Container(
                       width: 80,
                       margin: const EdgeInsets.symmetric(horizontal: 4),
                       decoration: BoxDecoration(
-                        color: isSelected ? color.withOpacity(0.15) : Colors.white,
+                        color: isSelected
+                            ? color.withOpacity(0.15)
+                            : Colors.white,
                         borderRadius: BorderRadius.circular(16),
                         border: Border.all(
                           color: isSelected ? color : Colors.grey.shade200,
@@ -370,7 +423,9 @@ class _ProductListViewState extends ConsumerState<ProductListView> {
                             name,
                             style: TextStyle(
                               fontSize: 12,
-                              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                              fontWeight: isSelected
+                                  ? FontWeight.bold
+                                  : FontWeight.normal,
                               color: isSelected ? color : Colors.black87,
                             ),
                           ),
@@ -389,7 +444,10 @@ class _ProductListViewState extends ConsumerState<ProductListView> {
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
-                    colors: [Colors.orange.shade800, Colors.deepOrange.shade600],
+                    colors: [
+                      Colors.orange.shade800,
+                      Colors.deepOrange.shade600,
+                    ],
                   ),
                   borderRadius: BorderRadius.circular(16),
                 ),
@@ -398,7 +456,11 @@ class _ProductListViewState extends ConsumerState<ProductListView> {
                   children: [
                     Row(
                       children: [
-                        const Icon(Icons.flash_on, color: Colors.amber, size: 28),
+                        const Icon(
+                          Icons.flash_on,
+                          color: Colors.amber,
+                          size: 28,
+                        ),
                         const SizedBox(width: 8),
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -419,11 +481,14 @@ class _ProductListViewState extends ConsumerState<ProductListView> {
                               ),
                             ),
                           ],
-                        )
+                        ),
                       ],
                     ),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 6,
+                      ),
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(12),
@@ -436,7 +501,7 @@ class _ProductListViewState extends ConsumerState<ProductListView> {
                           fontSize: 14,
                         ),
                       ),
-                    )
+                    ),
                   ],
                 ),
               ),
@@ -449,8 +514,13 @@ class _ProductListViewState extends ConsumerState<ProductListView> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    selectedCategory == null ? 'All Products' : '$selectedCategory Products',
-                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    selectedCategory == null
+                        ? 'All Products'
+                        : '$selectedCategory Products',
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   // Sort selector
                   DropdownButton<String>(
@@ -465,8 +535,14 @@ class _ProductListViewState extends ConsumerState<ProductListView> {
                     items: const [
                       DropdownMenuItem(value: 'newest', child: Text('Newest')),
                       DropdownMenuItem(value: 'oldest', child: Text('Oldest')),
-                      DropdownMenuItem(value: 'price low-high', child: Text('Price: Low-High')),
-                      DropdownMenuItem(value: 'price high-low', child: Text('Price: High-Low')),
+                      DropdownMenuItem(
+                        value: 'price low-high',
+                        child: Text('Price: Low-High'),
+                      ),
+                      DropdownMenuItem(
+                        value: 'price high-low',
+                        child: Text('Price: High-Low'),
+                      ),
                     ],
                   ),
                 ],
@@ -521,7 +597,9 @@ class _ProductListViewState extends ConsumerState<ProductListView> {
                     final stock = product['stock'] as int;
                     final cat = product['category'] ?? 'General';
                     final imageUrl = product['image_url'];
-                    final fullImageUrl = imageUrl != null ? '$baseUrl$imageUrl' : null;
+                    final fullImageUrl = imageUrl != null
+                        ? '$baseUrl$imageUrl'
+                        : null;
 
                     // Calculate discount percentage
                     int discountPercent = 0;
@@ -551,20 +629,34 @@ class _ProductListViewState extends ConsumerState<ProductListView> {
                                         ? Image.network(
                                             fullImageUrl,
                                             fit: BoxFit.cover,
-                                            errorBuilder: (context, error, stackTrace) =>
-                                                const Icon(Icons.shopping_bag, size: 48, color: Colors.orange),
+                                            errorBuilder:
+                                                (context, error, stackTrace) =>
+                                                    const Icon(
+                                                      Icons.shopping_bag,
+                                                      size: 48,
+                                                      color: Colors.orange,
+                                                    ),
                                           )
-                                        : const Icon(Icons.shopping_bag, size: 48, color: Colors.orange),
+                                        : const Icon(
+                                            Icons.shopping_bag,
+                                            size: 48,
+                                            color: Colors.orange,
+                                          ),
                                   ),
                                   if (discountPercent > 0)
                                     Positioned(
                                       top: 8,
                                       left: 8,
                                       child: Container(
-                                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 8,
+                                          vertical: 4,
+                                        ),
                                         decoration: BoxDecoration(
                                           color: Colors.red.shade600,
-                                          borderRadius: BorderRadius.circular(8),
+                                          borderRadius: BorderRadius.circular(
+                                            8,
+                                          ),
                                         ),
                                         child: Text(
                                           '$discountPercent% OFF',
@@ -580,9 +672,14 @@ class _ProductListViewState extends ConsumerState<ProductListView> {
                                     top: 8,
                                     right: 8,
                                     child: Container(
-                                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 8,
+                                        vertical: 4,
+                                      ),
                                       decoration: BoxDecoration(
-                                        color: stock > 0 ? Colors.green.shade600 : Colors.red.shade600,
+                                        color: stock > 0
+                                            ? Colors.green.shade600
+                                            : Colors.red.shade600,
                                         borderRadius: BorderRadius.circular(8),
                                       ),
                                       child: Text(
@@ -617,7 +714,11 @@ class _ProductListViewState extends ConsumerState<ProductListView> {
                                   const SizedBox(height: 4),
                                   Row(
                                     children: [
-                                      const Icon(Icons.star, color: Colors.amber, size: 14),
+                                      const Icon(
+                                        Icons.star,
+                                        color: Colors.amber,
+                                        size: 14,
+                                      ),
                                       const SizedBox(width: 4),
                                       const Text(
                                         '4.5',
@@ -628,10 +729,15 @@ class _ProductListViewState extends ConsumerState<ProductListView> {
                                       ),
                                       const Spacer(),
                                       Container(
-                                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 6,
+                                          vertical: 2,
+                                        ),
                                         decoration: BoxDecoration(
                                           color: Colors.orange.shade100,
-                                          borderRadius: BorderRadius.circular(4),
+                                          borderRadius: BorderRadius.circular(
+                                            4,
+                                          ),
                                         ),
                                         child: Text(
                                           cat,
@@ -662,22 +768,27 @@ class _ProductListViewState extends ConsumerState<ProductListView> {
                                           style: const TextStyle(
                                             fontSize: 12,
                                             color: Colors.red,
-                                            decoration: TextDecoration.lineThrough,
+                                            decoration:
+                                                TextDecoration.lineThrough,
                                           ),
                                         ),
                                     ],
                                   ),
                                   const SizedBox(height: 4),
                                   Text(
-                                    stock > 0 ? '$stock units available' : 'Temporarily unavailable',
+                                    stock > 0
+                                        ? '$stock units available'
+                                        : 'Temporarily unavailable',
                                     style: TextStyle(
                                       fontSize: 11,
-                                      color: stock > 0 ? Colors.grey : Colors.red,
+                                      color: stock > 0
+                                          ? Colors.grey
+                                          : Colors.red,
                                     ),
                                   ),
                                 ],
                               ),
-                            )
+                            ),
                           ],
                         ),
                       ),
@@ -686,7 +797,10 @@ class _ProductListViewState extends ConsumerState<ProductListView> {
                 );
               },
               error: (err, stack) => Center(
-                child: Text('Error: $err', style: const TextStyle(color: Colors.red)),
+                child: Text(
+                  'Error: $err',
+                  style: const TextStyle(color: Colors.red),
+                ),
               ),
               loading: () => const Center(
                 child: Padding(
@@ -694,7 +808,7 @@ class _ProductListViewState extends ConsumerState<ProductListView> {
                   child: CircularProgressIndicator(),
                 ),
               ),
-            )
+            ),
           ],
         ),
       ),

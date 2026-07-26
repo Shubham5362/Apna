@@ -1,0 +1,8 @@
+{
+  "cleanUrls": true,
+  "buildCommand": "cd frontend && ./install-and-build.sh",
+  "outputDirectory": "frontend/build/web",
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/" }
+  ]
+}
